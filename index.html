@@ -2,63 +2,51 @@
 <html lang="ka">
 <head>
     <meta charset="UTF-8">
-    <title>Duty Manager Pro - Animated & Custom Edition</title>
+    <title>Duty Manager Pro - Full Control & Comms</title>
     <style>
         :root { --dark: #0f172a; --blue: #38bdf8; --green: #16a34a; --viber: #7360f2; --bg: #f8fafc; --alert: #ef4444; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--bg); overflow: hidden; }
         
         #sidebar { width: 380px; background: var(--dark); color: white; padding: 25px; overflow-y: auto; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,0.1); }
         .box { background: rgba(255,255,255,0.07); padding: 18px; border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        h3 { color: var(--blue); font-size: 12px; text-transform: uppercase; margin: 0 0 15px 0; letter-spacing: 2px; font-weight: 800; }
-        input, textarea, select { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px; border: none; font-weight: 700; box-sizing: border-box; font-size: 14px; }
+        h3 { color: var(--blue); font-size: 11px; text-transform: uppercase; margin: 0 0 15px 0; letter-spacing: 2px; font-weight: 800; }
+        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 12px; border: none; font-weight: 700; box-sizing: border-box; font-size: 14px; }
         
         #main { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
         #canvas { width: 100%; max-width: 720px; background: white; border-radius: 45px; padding: 35px; box-shadow: 0 30px 60px rgba(15, 23, 42, 0.15); }
         
-        /* პულსირებადი ანიმაცია */
         @keyframes pulse-border {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            50% { transform: scale(1.02); box-shadow: 0 0 30px 10px rgba(239, 68, 68, 0.4); }
+            50% { transform: scale(1.01); box-shadow: 0 0 25px 10px rgba(239, 68, 68, 0.4); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
         .live-banner { 
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); 
-            color: white; 
-            padding: 35px; 
-            border-radius: 35px; 
-            text-align: center; 
-            margin-bottom: 25px; 
-            border: 5px solid var(--alert); 
-            animation: pulse-border 3s infinite ease-in-out;
-            position: relative;
-            transition: all 0.3s ease;
+            background: #0f172a; color: white; padding: 35px; border-radius: 35px; text-align: center; 
+            margin-bottom: 25px; border: 5px solid var(--alert); animation: pulse-border 3s infinite ease-in-out;
         }
-        .big-date { font-size: 48px; font-weight: 900; color: var(--blue); margin-bottom: 10px; letter-spacing: -1px; }
+        .big-date { font-size: 48px; font-weight: 900; color: var(--blue); margin-bottom: 10px; }
         .live-name { font-size: 28px; font-weight: 800; margin-bottom: 5px; color: #fff; }
         
         .priority-box { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .p-card { padding: 15px; border-radius: 28px; color: white; text-align: center; min-height: 160px; display: flex; flex-direction: column; }
-        .reg-card { background: #475569; } 
+        .p-card { padding: 15px; border-radius: 28px; color: white; text-align: center; min-height: 160px; display: flex; flex-direction: column; background: #475569; }
+        .p-info { background: rgba(255,255,255,0.1); padding: 10px 5px; border-radius: 18px; margin-bottom: 8px; font-size: 13px; }
         
-        .p-card small { font-weight: 900; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; margin-bottom: 10px; display: block; opacity: 0.9; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; }
-        .p-info { background: rgba(255,255,255,0.1); padding: 10px 5px; border-radius: 18px; margin-bottom: 8px; }
-        
-        .btn-m { text-decoration: none; padding: 5px 10px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; margin: 2px; font-size: 11px; font-weight: 900; border: none; }
+        .btn-m { text-decoration: none; padding: 5px 10px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; margin: 2px; font-size: 10px; font-weight: 900; border: none; cursor: pointer; }
         .btn-call { background: var(--green) !important; color: white !important; }
         .btn-viber { background: var(--viber) !important; color: white !important; }
         
-        .row { padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .row { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
         .today-row { background: #fef2f2; border-left: 8px solid var(--alert); border-radius: 0 20px 20px 0; }
         
-        .btn-gen { background: #334155; color: white; width: 100%; padding: 14px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; font-size: 14px; }
-        .btn-blue { background: var(--blue); color: #020617; }
-        .btn-export { background: var(--green); color: white; width: 720px; padding: 20px; border-radius: 25px; border: none; font-weight: 900; cursor: pointer; margin-top: 20px; font-size: 18px; }
+        .btn-gen { background: #334155; color: white; width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; }
+        .s-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 10px; margin-bottom: 5px; font-size: 11px; }
+        .del { color: #ff4757; cursor: pointer; font-weight: bold; padding-left: 10px; }
         
         .color-ctrl { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
-        .color-ctrl input { width: 50px; height: 30px; padding: 0; cursor: pointer; }
-        .s-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 12px; margin-bottom: 6px; font-size: 13px; }
-        .del { color: #ff4757; cursor: pointer; font-size: 18px; padding-left: 10px; }
+        .color-ctrl input { width: 50px; height: 30px; padding: 0; cursor: pointer; border: none; background: none; }
+        
+        .edit-select { width: 170px; font-size: 12px; padding: 5px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 700; background: #fff; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -66,47 +54,46 @@
 <div id="sidebar">
     <div class="box">
         <h3>🎨 დიზაინის მართვა</h3>
-        <div class="color-ctrl">ბანერის ფონი <input type="color" id="clrBg" value="#0f172a" oninput="updateStyle()"></div>
-        <div class="color-ctrl">კანტის ფერი <input type="color" id="clrBorder" value="#ef4444" oninput="updateStyle()"></div>
-        <div class="color-ctrl">თარიღის/ნომრის ფერი <input type="color" id="clrText" value="#38bdf8" oninput="updateStyle()"></div>
-        <div class="color-ctrl">სახელის ფერი <input type="color" id="clrName" value="#ffffff" oninput="updateStyle()"></div>
+        <div class="color-ctrl">ბანერის ფონი <input type="color" id="clrBg" value="#0f172a" oninput="updateUIStyles()"></div>
+        <div class="color-ctrl">კანტის ფერი <input type="color" id="clrBorder" value="#ef4444" oninput="updateUIStyles()"></div>
+        <div class="color-ctrl">თარიღის ფერი <input type="color" id="clrText" value="#38bdf8" oninput="updateUIStyles()"></div>
+        <div class="color-ctrl">სახელის ფერი <input type="color" id="clrName" value="#ffffff" oninput="updateUIStyles()"></div>
     </div>
 
     <div class="box">
-        <h3>📅 პერიოდის მართვა</h3>
+        <h3>📅 პერიოდი</h3>
         <input type="month" id="workMonth">
         <div style="display:flex; gap:10px;">
             <input type="number" id="rangeStart" value="1">
             <input type="number" id="rangeEnd" value="31">
         </div>
-        <button class="btn-gen btn-blue" onclick="generateSchedule()">🔄 განრიგის გენერირება</button>
+        <button class="btn-gen" style="background:var(--blue); color:#000" onclick="generateSchedule()">🔄 გენერირება</button>
     </div>
 
     <div class="box">
-        <h3>👥 პერსონალი</h3>
+        <h3>👥 მორიგე პერსონალი</h3>
         <input type="text" id="stName" placeholder="სახელი გვარი">
         <input type="text" id="stPhone" placeholder="ტელეფონი">
         <button class="btn-gen" style="background:#6366f1" onclick="addItem('staff')">+ დამატება</button>
-        <div id="staffListUI" style="margin-top:15px;"></div>
+        <div id="staffListUI" style="margin-top:10px; max-height: 120px; overflow-y: auto;"></div>
     </div>
 
     <div class="box">
-        <h3>🏔️ რეგიონები</h3>
+        <h3>🏔️ რეგიონალური მენეჯერები</h3>
         <select id="regType">
             <option value="west">🏔️ დასავლეთი</option>
             <option value="east">☀️ აღმოსავლეთი</option>
         </select>
         <input type="text" id="regName" placeholder="სახელი გვარი">
         <input type="text" id="regPhone" placeholder="ტელეფონი">
-        <button class="btn-gen" onclick="addItem('regional')">+ დამატება</button>
-        <div id="regListUI" style="margin-top:15px;"></div>
+        <button class="btn-gen" onclick="addItem('regional')">+ რეგიონალის დამატება</button>
+        <div id="regListUI" style="margin-top:10px;"></div>
     </div>
 
     <div class="box">
         <h3>📞 ქოლცენტრი / შენიშვნა</h3>
         <input type="text" id="ccNum" value="8888" oninput="render()">
         <textarea id="noteTxt" placeholder="შენიშვნა..." oninput="render()"></textarea>
-        <input type="color" id="noteClr" value="#ef4444" onchange="render()">
     </div>
 </div>
 
@@ -116,22 +103,22 @@
             <div id="liveD" class="big-date">---</div>
             <div id="liveN" class="live-name">- - -</div>
             <a id="liveP" href="#" style="font-size:32px; color:var(--blue); font-weight:900; text-decoration:none; display:block; margin:10px 0;">---</a>
-            <div style="display:flex; gap:15px; justify-content:center; margin-top:20px;">
-                <a id="liveC" href="#" class="btn-gen btn-call" style="width:140px; padding:15px; font-size:16px;">📞 CALL</a>
-                <a id="liveV" href="#" class="btn-gen btn-viber" style="width:140px; padding:15px; font-size:16px;">💜 VIBER</a>
+            <div style="display:flex; gap:15px; justify-content:center; margin-top:10px;">
+                <a id="liveC" href="#" class="btn-m btn-call" style="width:120px; padding:12px;">📞 CALL</a>
+                <a id="liveV" href="#" class="btn-m btn-viber" style="width:120px; padding:12px;">💜 VIBER</a>
             </div>
         </div>
 
         <div class="priority-box">
-            <div id="wBox" class="p-card reg-card"></div>
-            <div id="eBox" class="p-card reg-card"></div>
-            <div id="cBox" class="p-card" style="background:#334155; border:2px dashed rgba(255,255,255,0.3)"></div>
+            <div id="wBox" class="p-card"></div>
+            <div id="eBox" class="p-card"></div>
+            <div id="cBox" class="p-card" style="background:#334155;"></div>
         </div>
 
-        <div id="noteBox" style="display:none; padding:20px; border-radius:25px; border-left:8px solid; margin-bottom:25px; background:#f1f5f9; font-weight:800; font-size:16px; color:#1e293b;"></div>
+        <div id="noteBox" style="display:none; padding:20px; border-radius:25px; border-left:8px solid; margin-bottom:25px; background:#f1f5f9; font-weight:800; font-size:16px;"></div>
         <div id="scheduleBody"></div>
     </div>
-    <button class="btn-export" onclick="exportFinal()">📋 საბოლოო HTML-ის კოპირება</button>
+    <button class="btn-gen" style="background:var(--green); width:720px; margin-top:20px; padding:18px; font-size:18px;" onclick="exportFinal()">📋 საბოლოო HTML-ის კოპირება</button>
 </div>
 
 <script>
@@ -151,127 +138,152 @@
     let schedule = [];
     const months = ["იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი", "ივლისი", "აგვისტო", "სექტემბერი", "ოქტომბერი", "ნოემბერი", "დეკემბერი"];
 
-    function updateStyle() {
+    window.onload = () => {
+        document.getElementById('workMonth').value = new Date().toISOString().slice(0, 7);
+        render();
+        updateUIStyles();
+    };
+
+    function updateUIStyles() {
         const bg = document.getElementById('clrBg').value;
         const brd = document.getElementById('clrBorder').value;
         const txt = document.getElementById('clrText').value;
         const nme = document.getElementById('clrName').value;
-        
+
         const banner = document.getElementById('liveBanner');
         banner.style.background = bg;
         banner.style.borderColor = brd;
-        
         document.getElementById('liveD').style.color = txt;
         document.getElementById('liveP').style.color = txt;
         document.getElementById('liveN').style.color = nme;
-        
-        // დინამიური ანიმაციის ფერი
-        const styleId = 'dynamic-pulse';
-        let styleTag = document.getElementById(styleId);
-        if(!styleTag) {
-            styleTag = document.createElement('style');
-            styleTag.id = styleId;
-            document.head.appendChild(styleTag);
-        }
+
+        const styleId = 'dynamic-pulse-style';
+        let styleTag = document.getElementById(styleId) || document.createElement('style');
+        styleTag.id = styleId;
         styleTag.innerHTML = `@keyframes pulse-border { 
-            0% { transform: scale(1); box-shadow: 0 0 0 0 ${brd}b3; }
-            50% { transform: scale(1.02); box-shadow: 0 0 30px 10px ${brd}66; }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 ${brd}00; }
+            0% { transform: scale(1); box-shadow: 0 0 0 0 ${brd}b3; } 
+            50% { transform: scale(1.01); box-shadow: 0 0 25px 10px ${brd}66; } 
+            100% { transform: scale(1); box-shadow: 0 0 0 0 ${brd}00; } 
         }`;
+        document.head.appendChild(styleTag);
     }
 
     function addItem(type) {
         if(type === 'staff') {
             const n = document.getElementById('stName').value, p = document.getElementById('stPhone').value;
-            if(n && p) { staff.push({name:n, phone:p}); }
-        } else {
-            const n = document.getElementById('regName').value, p = document.getElementById('regPhone').value, t = document.getElementById('regType').value;
-            if(n && p) { t === 'west' ? west.push({name:n, phone:p}) : east.push({name:n, phone:p}); }
+            if(n && p) { staff.push({name:n, phone:p}); document.getElementById('stName').value=''; document.getElementById('stPhone').value=''; }
+        } else if(type === 'regional') {
+            const n = document.getElementById('regName').value, p = document.getElementById('regPhone').value, r = document.getElementById('regType').value;
+            if(n && p) {
+                if(r === 'west') west.push({name:n, phone:p}); else east.push({name:n, phone:p});
+                document.getElementById('regName').value=''; document.getElementById('regPhone').value='';
+            }
         }
         render();
     }
 
     function generateSchedule() {
         const mVal = document.getElementById('workMonth').value;
-        const start = parseInt(document.getElementById('rangeStart').value), end = parseInt(document.getElementById('rangeEnd').value);
-        if(!mVal || staff.length === 0) return;
+        const s = parseInt(document.getElementById('rangeStart').value), e = parseInt(document.getElementById('rangeEnd').value);
+        if(!mVal || !staff.length) return;
         schedule = [];
-        for(let d = start; d <= end; d++) schedule.push({ day: d, person: staff[(d-start) % staff.length] });
+        for(let d = s; d <= e; d++) {
+            schedule.push({ day: d, person: staff[(d-s) % staff.length] });
+        }
+        render();
+    }
+
+    function changeDuty(dayIdx, newName) {
+        schedule[dayIdx].person = staff.find(p => p.name === newName);
         render();
     }
 
     function render() {
         document.getElementById('staffListUI').innerHTML = staff.map((s, i) => `<div class="s-item">${s.name} <span class="del" onclick="staff.splice(${i},1);render()">✕</span></div>`).join('');
-        document.getElementById('regListUI').innerHTML = west.map((s, i) => `<div class="s-item">W: ${s.name} <span class="del" onclick="west.splice(${i},1);render()">✕</span></div>`).join('') + east.map((s, i) => `<div class="s-item">E: ${s.name} <span class="del" onclick="east.splice(${i},1);render()">✕</span></div>`).join('');
+        document.getElementById('regListUI').innerHTML = 
+            west.map((s, i) => `<div class="s-item">W: ${s.name} <span class="del" onclick="west.splice(${i},1);render()">✕</span></div>`).join('') +
+            east.map((s, i) => `<div class="s-item">E: ${s.name} <span class="del" onclick="east.splice(${i},1);render()">✕</span></div>`).join('');
 
-        const drawP = (list) => list.map(p => `<div class="p-info"><b>${p.name}</b><span style="display:block; font-size:12px;">${p.phone}</span><div style="margin-top:3px;"><a href="tel:${p.phone}" class="btn-m btn-call">📞 CALL</a><a href="viber://chat?number=%2B995${p.phone.slice(-9)}" class="btn-m btn-viber">💜 VIBER</a></div></div>`).join('');
-        document.getElementById('wBox').innerHTML = `<small>🏔️ დასავლეთის პასუხისმგებელი პირი</small>` + drawP(west);
-        document.getElementById('eBox').innerHTML = `<small>☀️ აღმოსავლეთის პასუხისმგებელი პირი</small>` + drawP(east);
-        document.getElementById('cBox').innerHTML = `<small>📞 ქოლცენტრი</small><b style="font-size:24px; margin:15px 0; display:block;">${document.getElementById('ccNum').value}</b>`;
+        const getViberLink = (phone) => `viber://chat?number=%2B995${phone.replace(/\s+/g, '').slice(-9)}`;
+
+        const drawP = (list, title) => `<small style="text-transform:uppercase; font-size:10px; display:block; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px;">${title}</small>` + 
+            list.map(p => `
+                <div class="p-info">
+                    <b>${p.name}</b><br>${p.phone}
+                    <div style="margin-top:5px;">
+                        <a href="tel:${p.phone}" class="btn-m btn-call">📞</a>
+                        <a href="${getViberLink(p.phone)}" class="btn-m btn-viber">💜</a>
+                    </div>
+                </div>`).join('');
+
+        document.getElementById('wBox').innerHTML = drawP(west, "🏔️ დასავლეთი");
+        document.getElementById('eBox').innerHTML = drawP(east, "☀️ აღმოსავლეთი");
+        document.getElementById('cBox').innerHTML = `<small style="text-transform:uppercase; font-size:10px;">📞 ქოლცენტრი</small><b style="font-size:24px; margin:15px 0; display:block;">${document.getElementById('ccNum').value}</b><small>09:00 - 18:00</small>`;
 
         const nBox = document.getElementById('noteBox'), nTxt = document.getElementById('noteTxt').value;
-        nBox.style.display = nTxt ? 'block' : 'none'; nBox.innerText = nTxt; nBox.style.borderColor = document.getElementById('noteClr').value;
+        nBox.style.display = nTxt ? 'block' : 'none'; nBox.innerText = nTxt; nBox.style.borderColor = document.getElementById('clrBorder').value;
 
         const mVal = document.getElementById('workMonth').value;
-        if(mVal && schedule.length) {
-            const year = parseInt(mVal.split('-')[0]), month = parseInt(mVal.split('-')[1]) - 1;
-            const mName = months[month], today = new Date().getDate();
+        if(!mVal || !schedule.length) return;
+        const year = parseInt(mVal.split('-')[0]), month = parseInt(mVal.split('-')[1])-1;
+        const today = new Date().getDate(), currM = new Date().getMonth();
+
+        document.getElementById('scheduleBody').innerHTML = schedule.map((item, idx) => {
+            const dateObj = new Date(year, month, item.day);
+            const hours = (dateObj.getDay() === 0 || dateObj.getDay() === 6) ? "06:00 - 06:00" : "18:00 - 06:00";
+            let isToday = (item.day === today && month === currM);
             
-            document.getElementById('scheduleBody').innerHTML = schedule.map((item, idx) => {
-                const dateObj = new Date(year, month, item.day);
-                const hours = (dateObj.getDay() === 0 || dateObj.getDay() === 6) ? "06:00 - 06:00" : "18:00 - 06:00";
-                let isToday = (item.day === today);
-                if(isToday) {
-                    document.getElementById('liveD').innerText = `${item.day} ${mName}`;
-                    document.getElementById('liveN').innerText = item.person.name;
-                    document.getElementById('liveP').innerText = item.person.phone;
-                    document.getElementById('liveC').href = "tel:"+item.person.phone;
-                    document.getElementById('liveV').href = "viber://chat?number=%2B995"+item.person.phone.slice(-9);
-                }
-                return `<div class="row ${isToday ? 'today-row' : ''}">
-                    <div><b>${item.day} ${mName}</b><br><small style="font-size:11px; color:#64748b;">${hours}</small></div>
-                    <div style="text-align:right">
-                        <b>${item.person.name}</b><br><div style="font-size:14px; font-weight:900; color:#334155; margin-bottom:5px;">${item.person.phone}</div>
-                        <div style="display:flex; gap:5px; justify-content:flex-end;">
-                            <a href="tel:${item.person.phone}" class="btn-m btn-call">📞 CALL</a>
-                            <a href="viber://chat?number=%2B995${item.person.phone.slice(-9)}" class="btn-m btn-viber">💜 VIBER</a>
-                        </div>
+            if(isToday) {
+                document.getElementById('liveD').innerText = `${item.day} ${months[month]}`;
+                document.getElementById('liveN').innerText = item.person.name;
+                document.getElementById('liveP').innerText = item.person.phone;
+                document.getElementById('liveP').href = "tel:"+item.person.phone;
+                document.getElementById('liveC').href = "tel:"+item.person.phone;
+                document.getElementById('liveV').href = getViberLink(item.person.phone);
+            }
+
+            return `<div class="row ${isToday ? 'today-row' : ''}">
+                <div><b>${item.day} ${months[month]}</b><br><small style="font-size:11px; color:#64748b;">${hours}</small></div>
+                <div style="text-align:right">
+                    <select class="edit-select" onchange="changeDuty(${idx}, this.value)">
+                        ${staff.map(s => `<option value="${s.name}" ${s.name === item.person.name ? 'selected' : ''}>${s.name}</option>`).join('')}
+                    </select>
+                    <div style="font-weight:900; color:#334155; font-size:14px; margin-bottom:5px;">${item.person.phone}</div>
+                    <div style="display:flex; gap:3px; justify-content:flex-end;">
+                        <a href="tel:${item.person.phone}" class="btn-m btn-call">📞 CALL</a>
+                        <a href="${getViberLink(item.person.phone)}" class="btn-m btn-viber">💜 VIBER</a>
                     </div>
-                </div>`;
-            }).join('');
-        }
+                </div>
+            </div>`;
+        }).join('');
     }
 
     function exportFinal() {
-        const bg = document.getElementById('clrBg').value, brd = document.getElementById('clrBorder').value;
-        const txt = document.getElementById('clrText').value, nme = document.getElementById('clrName').value;
         const canvas = document.getElementById('canvas').cloneNode(true);
+        canvas.querySelectorAll('.edit-select').forEach(sel => {
+            sel.outerHTML = `<b style="font-size:16px; display:block; color:#0f172a; margin-bottom:4px;">${sel.value}</b>`;
+        });
         
-        canvas.querySelector('#liveD').style.color = txt;
-        canvas.querySelector('#liveP').style.color = txt;
-        canvas.querySelector('#liveN').style.color = nme;
-
-        const style = `
-        <style>
-            body{font-family:system-ui,sans-serif; background:#f8fafc; display:flex; justify-content:center; padding:20px;}
+        const brd = document.getElementById('clrBorder').value;
+        const finalHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+            body{font-family:system-ui; background:#f8fafc; display:flex; justify-content:center; padding:20px;}
             #canvas{width:100%; max-width:720px; background:white; border-radius:45px; padding:35px; box-shadow:0 30px 60px rgba(0,0,0,0.1);}
-            @keyframes pulse { 0%{transform:scale(1); box-shadow:0 0 0 0 ${brd}b3;} 50%{transform:scale(1.02); box-shadow:0 0 30px 10px ${brd}66;} 100%{transform:scale(1); box-shadow:0 0 0 0 ${brd}00;} }
-            .live-banner{ background:${bg}; border:5px solid ${brd}; color:white; border-radius:35px; text-align:center; padding:35px; margin-bottom:25px; animation: pulse 3s infinite ease-in-out; }
+            .live-banner{background:${document.getElementById('clrBg').value}; color:white; border-radius:35px; text-align:center; padding:35px; margin-bottom:25px; border:5px solid ${brd}; animation: p 3s infinite ease-in-out;}
+            @keyframes p { 0%{transform:scale(1); box-shadow:0 0 0 0 ${brd}b3;} 50%{transform:scale(1.01); box-shadow:0 0 20px 5px ${brd}66;} 100%{transform:scale(1);} }
+            .big-date{font-size:48px; font-weight:900; color:${document.getElementById('clrText').value}; margin-bottom:10px;}
+            .live-name{font-size:28px; font-weight:800; color:${document.getElementById('clrName').value};}
             .priority-box{display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:20px;}
             .p-card{background:#475569; padding:15px; border-radius:28px; color:white; text-align:center; font-size:11px;}
-            .row{padding:20px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;}
-            .btn-call{background:#16a34a; color:white; padding:10px 20px; border-radius:12px; text-decoration:none; font-weight:800; display:inline-block;}
-            .btn-viber{background:#7360f2; color:white; padding:10px 20px; border-radius:12px; text-decoration:none; font-weight:800; display:inline-block;}
-            small{text-transform:uppercase; font-size:10px; display:block; margin-bottom:10px;}
-        </style>`;
+            .p-info{background:rgba(255,255,255,0.1); padding:10px 5px; border-radius:18px; margin-bottom:8px;}
+            .row{padding:15px 20px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;}
+            .btn-m{text-decoration:none; padding:8px 15px; border-radius:10px; font-weight:800; display:inline-block; margin:2px; background:#16a34a; color:white; font-size:10px;}
+            .btn-viber{background:#7360f2 !important;}
+        </style></head><body>${canvas.outerHTML}</body></html>`;
         
-        const finalHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8">${style}</head><body>${canvas.outerHTML}</body></html>`;
         const el = document.createElement('textarea'); el.value = finalHTML; document.body.appendChild(el); el.select();
         document.execCommand('copy'); document.body.removeChild(el);
-        alert("✅ ანიმაციური კოდი დაკოპირებულია!");
+        alert("✅ სრული კოდი დაკოპირებულია!");
     }
-
-    window.onload = () => { document.getElementById('workMonth').value = new Date().toISOString().slice(0, 7); render(); updateStyle(); };
 </script>
 </body>
 </html>
