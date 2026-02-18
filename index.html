@@ -2,9 +2,9 @@
 <html lang="ka">
 <head>
     <meta charset="UTF-8">
-    <title>Duty Manager Pro - Ultimate Control</title>
+    <title>Duty Manager Pro - Animated & Custom Edition</title>
     <style>
-        :root { --dark: #0f172a; --blue: #0ea5e9; --green: #16a34a; --viber: #7360f2; --bg: #f8fafc; }
+        :root { --dark: #0f172a; --blue: #38bdf8; --green: #16a34a; --viber: #7360f2; --bg: #f8fafc; --alert: #ef4444; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--bg); overflow: hidden; }
         
         #sidebar { width: 380px; background: var(--dark); color: white; padding: 25px; overflow-y: auto; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,0.1); }
@@ -15,25 +15,49 @@
         #main { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
         #canvas { width: 100%; max-width: 720px; background: white; border-radius: 45px; padding: 35px; box-shadow: 0 30px 60px rgba(15, 23, 42, 0.15); }
         
-        .live-banner { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; padding: 30px; border-radius: 35px; text-align: center; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1); }
-        .big-date { font-size: 42px; font-weight: 900; color: var(--blue); margin-bottom: 8px; letter-spacing: -1px; }
-        .live-name { font-size: 24px; font-weight: 800; margin-bottom: 5px; }
+        /* პულსირებადი ანიმაცია */
+        @keyframes pulse-border {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { transform: scale(1.02); box-shadow: 0 0 30px 10px rgba(239, 68, 68, 0.4); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .live-banner { 
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); 
+            color: white; 
+            padding: 35px; 
+            border-radius: 35px; 
+            text-align: center; 
+            margin-bottom: 25px; 
+            border: 5px solid var(--alert); 
+            animation: pulse-border 3s infinite ease-in-out;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .big-date { font-size: 48px; font-weight: 900; color: var(--blue); margin-bottom: 10px; letter-spacing: -1px; }
+        .live-name { font-size: 28px; font-weight: 800; margin-bottom: 5px; color: #fff; }
         
         .priority-box { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .p-card { padding: 15px; border-radius: 28px; color: white; text-align: center; min-height: 160px; display: flex; flex-direction: column; justify-content: flex-start; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .p-card small { font-weight: 900; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; margin-bottom: 10px; display: block; opacity: 0.9; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; }
-        .p-info { background: rgba(255,255,255,0.15); padding: 10px 5px; border-radius: 18px; margin-bottom: 8px; }
+        .p-card { padding: 15px; border-radius: 28px; color: white; text-align: center; min-height: 160px; display: flex; flex-direction: column; }
+        .reg-card { background: #475569; } 
         
-        .btn-m { text-decoration: none; padding: 5px 10px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; margin: 2px; font-size: 11px; font-weight: 900; transition: 0.2s; border: none; }
+        .p-card small { font-weight: 900; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; margin-bottom: 10px; display: block; opacity: 0.9; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; }
+        .p-info { background: rgba(255,255,255,0.1); padding: 10px 5px; border-radius: 18px; margin-bottom: 8px; }
+        
+        .btn-m { text-decoration: none; padding: 5px 10px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; margin: 2px; font-size: 11px; font-weight: 900; border: none; }
         .btn-call { background: var(--green) !important; color: white !important; }
         .btn-viber { background: var(--viber) !important; color: white !important; }
         
-        .row { padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
-        .today-row { background: #f0f9ff; border-left: 8px solid var(--blue); border-radius: 0 20px 20px 0; transform: scale(1.02); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .row { padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .today-row { background: #fef2f2; border-left: 8px solid var(--alert); border-radius: 0 20px 20px 0; }
         
-        .btn-gen { background: var(--blue); color: white; width: 100%; padding: 14px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; font-size: 14px; }
-        .btn-export { background: var(--green); color: white; width: 720px; padding: 20px; border-radius: 25px; border: none; font-weight: 900; cursor: pointer; margin-top: 20px; font-size: 18px; letter-spacing: 1px; box-shadow: 0 10px 20px rgba(22, 163, 74, 0.2); }
-        .s-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 12px; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
+        .btn-gen { background: #334155; color: white; width: 100%; padding: 14px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; font-size: 14px; }
+        .btn-blue { background: var(--blue); color: #020617; }
+        .btn-export { background: var(--green); color: white; width: 720px; padding: 20px; border-radius: 25px; border: none; font-weight: 900; cursor: pointer; margin-top: 20px; font-size: 18px; }
+        
+        .color-ctrl { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
+        .color-ctrl input { width: 50px; height: 30px; padding: 0; cursor: pointer; }
+        .s-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 12px; margin-bottom: 6px; font-size: 13px; }
         .del { color: #ff4757; cursor: pointer; font-size: 18px; padding-left: 10px; }
     </style>
 </head>
@@ -41,58 +65,66 @@
 
 <div id="sidebar">
     <div class="box">
-        <h3>📅 პერიოდის მართვა</h3>
-        <input type="month" id="workMonth">
-        <div style="display:flex; gap:10px;">
-            <input type="number" id="rangeStart" placeholder="დან" value="1">
-            <input type="number" id="rangeEnd" placeholder="მდე" value="31">
-        </div>
-        <button class="btn-gen" onclick="generateSchedule()">🔄 განრიგის გენერირება</button>
+        <h3>🎨 დიზაინის მართვა</h3>
+        <div class="color-ctrl">ბანერის ფონი <input type="color" id="clrBg" value="#0f172a" oninput="updateStyle()"></div>
+        <div class="color-ctrl">კანტის ფერი <input type="color" id="clrBorder" value="#ef4444" oninput="updateStyle()"></div>
+        <div class="color-ctrl">თარიღის/ნომრის ფერი <input type="color" id="clrText" value="#38bdf8" oninput="updateStyle()"></div>
+        <div class="color-ctrl">სახელის ფერი <input type="color" id="clrName" value="#ffffff" oninput="updateStyle()"></div>
     </div>
 
     <div class="box">
-        <h3>👥 მორიგე პერსონალი</h3>
+        <h3>📅 პერიოდის მართვა</h3>
+        <input type="month" id="workMonth">
+        <div style="display:flex; gap:10px;">
+            <input type="number" id="rangeStart" value="1">
+            <input type="number" id="rangeEnd" value="31">
+        </div>
+        <button class="btn-gen btn-blue" onclick="generateSchedule()">🔄 განრიგის გენერირება</button>
+    </div>
+
+    <div class="box">
+        <h3>👥 პერსონალი</h3>
         <input type="text" id="stName" placeholder="სახელი გვარი">
         <input type="text" id="stPhone" placeholder="ტელეფონი">
-        <button class="btn-gen" style="background:#6366f1" onclick="addItem('staff')">+ თანამშრომლის დამატება</button>
+        <button class="btn-gen" style="background:#6366f1" onclick="addItem('staff')">+ დამატება</button>
         <div id="staffListUI" style="margin-top:15px;"></div>
     </div>
 
     <div class="box">
-        <h3>🏔️ რეგიონის უფროსები</h3>
+        <h3>🏔️ რეგიონები</h3>
         <select id="regType">
             <option value="west">🏔️ დასავლეთი</option>
             <option value="east">☀️ აღმოსავლეთი</option>
         </select>
         <input type="text" id="regName" placeholder="სახელი გვარი">
         <input type="text" id="regPhone" placeholder="ტელეფონი">
-        <button class="btn-gen" style="background:var(--east)" onclick="addItem('regional')">+ პასუხისმგებლის დამატება</button>
+        <button class="btn-gen" onclick="addItem('regional')">+ დამატება</button>
         <div id="regListUI" style="margin-top:15px;"></div>
     </div>
 
     <div class="box">
         <h3>📞 ქოლცენტრი / შენიშვნა</h3>
         <input type="text" id="ccNum" value="8888" oninput="render()">
-        <textarea id="noteTxt" placeholder="დაწერეთ შენიშვნა..." oninput="render()"></textarea>
-        <input type="color" id="noteClr" value="#0ea5e9" onchange="render()">
+        <textarea id="noteTxt" placeholder="შენიშვნა..." oninput="render()"></textarea>
+        <input type="color" id="noteClr" value="#ef4444" onchange="render()">
     </div>
 </div>
 
 <div id="main">
     <div id="canvas">
-        <div class="live-banner">
+        <div id="liveBanner" class="live-banner">
             <div id="liveD" class="big-date">---</div>
             <div id="liveN" class="live-name">- - -</div>
-            <a id="liveP" href="#" style="font-size:30px; color:var(--blue); font-weight:900; text-decoration:none; display:block; margin:10px 0;">---</a>
-            <div style="display:flex; gap:15px; justify-content:center; margin-top:15px;">
-                <a id="liveC" href="#" class="btn-gen" style="background:var(--green); width:130px; text-decoration:none; display:flex; align-items:center; justify-content:center;">📞 CALL</a>
-                <a id="liveV" href="#" class="btn-gen" style="background:var(--viber); width:130px; text-decoration:none; display:flex; align-items:center; justify-content:center;">💜 VIBER</a>
+            <a id="liveP" href="#" style="font-size:32px; color:var(--blue); font-weight:900; text-decoration:none; display:block; margin:10px 0;">---</a>
+            <div style="display:flex; gap:15px; justify-content:center; margin-top:20px;">
+                <a id="liveC" href="#" class="btn-gen btn-call" style="width:140px; padding:15px; font-size:16px;">📞 CALL</a>
+                <a id="liveV" href="#" class="btn-gen btn-viber" style="width:140px; padding:15px; font-size:16px;">💜 VIBER</a>
             </div>
         </div>
 
         <div class="priority-box">
-            <div id="wBox" class="p-card" style="background:#f59e0b"></div>
-            <div id="eBox" class="p-card" style="background:#ea580c"></div>
+            <div id="wBox" class="p-card reg-card"></div>
+            <div id="eBox" class="p-card reg-card"></div>
             <div id="cBox" class="p-card" style="background:#334155; border:2px dashed rgba(255,255,255,0.3)"></div>
         </div>
 
@@ -119,21 +151,42 @@
     let schedule = [];
     const months = ["იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი", "ივლისი", "აგვისტო", "სექტემბერი", "ოქტომბერი", "ნოემბერი", "დეკემბერი"];
 
-    window.onload = () => {
-        document.getElementById('workMonth').value = new Date().toISOString().slice(0, 7);
-        render();
-    };
+    function updateStyle() {
+        const bg = document.getElementById('clrBg').value;
+        const brd = document.getElementById('clrBorder').value;
+        const txt = document.getElementById('clrText').value;
+        const nme = document.getElementById('clrName').value;
+        
+        const banner = document.getElementById('liveBanner');
+        banner.style.background = bg;
+        banner.style.borderColor = brd;
+        
+        document.getElementById('liveD').style.color = txt;
+        document.getElementById('liveP').style.color = txt;
+        document.getElementById('liveN').style.color = nme;
+        
+        // დინამიური ანიმაციის ფერი
+        const styleId = 'dynamic-pulse';
+        let styleTag = document.getElementById(styleId);
+        if(!styleTag) {
+            styleTag = document.createElement('style');
+            styleTag.id = styleId;
+            document.head.appendChild(styleTag);
+        }
+        styleTag.innerHTML = `@keyframes pulse-border { 
+            0% { transform: scale(1); box-shadow: 0 0 0 0 ${brd}b3; }
+            50% { transform: scale(1.02); box-shadow: 0 0 30px 10px ${brd}66; }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 ${brd}00; }
+        }`;
+    }
 
     function addItem(type) {
         if(type === 'staff') {
             const n = document.getElementById('stName').value, p = document.getElementById('stPhone').value;
-            if(n && p) { staff.push({name:n, phone:p}); document.getElementById('stName').value=''; document.getElementById('stPhone').value=''; }
+            if(n && p) { staff.push({name:n, phone:p}); }
         } else {
             const n = document.getElementById('regName').value, p = document.getElementById('regPhone').value, t = document.getElementById('regType').value;
-            if(n && p) {
-                if(t === 'west') west.push({name:n, phone:p}); else east.push({name:n, phone:p});
-                document.getElementById('regName').value=''; document.getElementById('regPhone').value='';
-            }
+            if(n && p) { t === 'west' ? west.push({name:n, phone:p}) : east.push({name:n, phone:p}); }
         }
         render();
     }
@@ -143,28 +196,18 @@
         const start = parseInt(document.getElementById('rangeStart').value), end = parseInt(document.getElementById('rangeEnd').value);
         if(!mVal || staff.length === 0) return;
         schedule = [];
-        for(let d = start; d <= end; d++) {
-            schedule.push({ day: d, person: staff[(d-start) % staff.length] });
-        }
-        render();
-    }
-
-    function updateDayPerson(idx, name) {
-        schedule[idx].person = staff.find(s => s.name === name);
+        for(let d = start; d <= end; d++) schedule.push({ day: d, person: staff[(d-start) % staff.length] });
         render();
     }
 
     function render() {
         document.getElementById('staffListUI').innerHTML = staff.map((s, i) => `<div class="s-item">${s.name} <span class="del" onclick="staff.splice(${i},1);render()">✕</span></div>`).join('');
-        document.getElementById('regListUI').innerHTML = 
-            west.map((s, i) => `<div class="s-item" style="color:#f59e0b">W: ${s.name} <span class="del" onclick="west.splice(${i},1);render()">✕</span></div>`).join('') +
-            east.map((s, i) => `<div class="s-item" style="color:#ea580c">E: ${s.name} <span class="del" onclick="east.splice(${i},1);render()">✕</span></div>`).join('');
+        document.getElementById('regListUI').innerHTML = west.map((s, i) => `<div class="s-item">W: ${s.name} <span class="del" onclick="west.splice(${i},1);render()">✕</span></div>`).join('') + east.map((s, i) => `<div class="s-item">E: ${s.name} <span class="del" onclick="east.splice(${i},1);render()">✕</span></div>`).join('');
 
-        const drawP = (list) => list.map(p => `<div class="p-info"><b>${p.name}</b><span>${p.phone}</span><div style="margin-top:3px;"><a href="tel:${p.phone}" class="btn-m btn-call">📞 CALL</a><a href="viber://chat?number=%2B995${p.phone.slice(-9)}" class="btn-m btn-viber">💜 VIBER</a></div></div>`).join('');
-        
-        document.getElementById('wBox').innerHTML = `<small>🏔️ დასავლეთი</small>` + drawP(west);
-        document.getElementById('eBox').innerHTML = `<small>☀️ აღმოსავლეთი</small>` + drawP(east);
-        document.getElementById('cBox').innerHTML = `<small>📞 ქოლცენტრი</small><b style="font-size:24px; margin:15px 0; display:block;">${document.getElementById('ccNum').value}</b><span style="font-size:11px; font-weight:800;">09:00 - 18:00</span>`;
+        const drawP = (list) => list.map(p => `<div class="p-info"><b>${p.name}</b><span style="display:block; font-size:12px;">${p.phone}</span><div style="margin-top:3px;"><a href="tel:${p.phone}" class="btn-m btn-call">📞 CALL</a><a href="viber://chat?number=%2B995${p.phone.slice(-9)}" class="btn-m btn-viber">💜 VIBER</a></div></div>`).join('');
+        document.getElementById('wBox').innerHTML = `<small>🏔️ დასავლეთის პასუხისმგებელი პირი</small>` + drawP(west);
+        document.getElementById('eBox').innerHTML = `<small>☀️ აღმოსავლეთის პასუხისმგებელი პირი</small>` + drawP(east);
+        document.getElementById('cBox').innerHTML = `<small>📞 ქოლცენტრი</small><b style="font-size:24px; margin:15px 0; display:block;">${document.getElementById('ccNum').value}</b>`;
 
         const nBox = document.getElementById('noteBox'), nTxt = document.getElementById('noteTxt').value;
         nBox.style.display = nTxt ? 'block' : 'none'; nBox.innerText = nTxt; nBox.style.borderColor = document.getElementById('noteClr').value;
@@ -172,14 +215,12 @@
         const mVal = document.getElementById('workMonth').value;
         if(mVal && schedule.length) {
             const year = parseInt(mVal.split('-')[0]), month = parseInt(mVal.split('-')[1]) - 1;
-            const mName = months[month];
-            const today = new Date().getDate(), currM = new Date().getMonth() + 1;
+            const mName = months[month], today = new Date().getDate();
             
             document.getElementById('scheduleBody').innerHTML = schedule.map((item, idx) => {
                 const dateObj = new Date(year, month, item.day);
                 const hours = (dateObj.getDay() === 0 || dateObj.getDay() === 6) ? "06:00 - 06:00" : "18:00 - 06:00";
-                let isToday = (item.day === today && (month + 1) === currM);
-                
+                let isToday = (item.day === today);
                 if(isToday) {
                     document.getElementById('liveD').innerText = `${item.day} ${mName}`;
                     document.getElementById('liveN').innerText = item.person.name;
@@ -187,14 +228,10 @@
                     document.getElementById('liveC').href = "tel:"+item.person.phone;
                     document.getElementById('liveV').href = "viber://chat?number=%2B995"+item.person.phone.slice(-9);
                 }
-
                 return `<div class="row ${isToday ? 'today-row' : ''}">
-                    <div><b>${item.day} ${mName}</b><br><small style="font-size:11px; color:#64748b; font-weight:800;">${hours}</small></div>
+                    <div><b>${item.day} ${mName}</b><br><small style="font-size:11px; color:#64748b;">${hours}</small></div>
                     <div style="text-align:right">
-                        <select style="width:160px; font-size:12px; margin-bottom: 5px;" onchange="updateDayPerson(${idx}, this.value)">
-                            ${staff.map(s => `<option value="${s.name}" ${s.name === item.person.name ? 'selected' : ''}>${s.name}</option>`).join('')}
-                        </select>
-                        <div style="font-size:14px; font-weight:900; color:var(--blue); margin-bottom:5px;">${item.person.phone}</div>
+                        <b>${item.person.name}</b><br><div style="font-size:14px; font-weight:900; color:#334155; margin-bottom:5px;">${item.person.phone}</div>
                         <div style="display:flex; gap:5px; justify-content:flex-end;">
                             <a href="tel:${item.person.phone}" class="btn-m btn-call">📞 CALL</a>
                             <a href="viber://chat?number=%2B995${item.person.phone.slice(-9)}" class="btn-m btn-viber">💜 VIBER</a>
@@ -206,82 +243,35 @@
     }
 
     function exportFinal() {
-        const mVal = document.getElementById('workMonth').value;
-        const year = parseInt(mVal.split('-')[0]), month = parseInt(mVal.split('-')[1]) - 1;
-        const mName = months[month];
+        const bg = document.getElementById('clrBg').value, brd = document.getElementById('clrBorder').value;
+        const txt = document.getElementById('clrText').value, nme = document.getElementById('clrName').value;
+        const canvas = document.getElementById('canvas').cloneNode(true);
         
-        // ფუნქცია პასუხისმგებელი პირების ბარათებისთვის საბოლოო HTML-ში
-        const getPriorityHTML = (title, list, color) => {
-            const items = list.map(p => `
-                <div style="background:rgba(255,255,255,0.15); padding:10px; border-radius:18px; margin-bottom:8px;">
-                    <b style="font-size:13px; display:block;">${p.name}</b>
-                    <span style="font-size:12px; display:block; margin-bottom:5px;">${p.phone}</span>
-                    <div style="display:flex; gap:3px; justify-content:center;">
-                        <a href="tel:${p.phone}" style="background:#16a34a; color:white; text-decoration:none; padding:4px 8px; border-radius:8px; font-size:10px; font-weight:900;">📞 CALL</a>
-                        <a href="viber://chat?number=%2B995${p.phone.slice(-9)}" style="background:#7360f2; color:white; text-decoration:none; padding:4px 8px; border-radius:8px; font-size:10px; font-weight:900;">💜 VIBER</a>
-                    </div>
-                </div>`).join('');
-            return `<div style="background:${color}; padding:15px; border-radius:28px; color:white; text-align:center; min-height:160px;">
-                <small style="text-transform:uppercase; font-size:10px; display:block; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px;">${title}</small>
-                ${items}
-            </div>`;
-        };
+        canvas.querySelector('#liveD').style.color = txt;
+        canvas.querySelector('#liveP').style.color = txt;
+        canvas.querySelector('#liveN').style.color = nme;
 
-        const finalRows = schedule.map(item => {
-            const dateObj = new Date(year, month, item.day);
-            const hours = (dateObj.getDay() === 0 || dateObj.getDay() === 6) ? "06:00 - 06:00" : "18:00 - 06:00";
-            return `
-            <div class="row" style="padding:20px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
-                <div><b>${item.day} ${mName}</b><br><small style="color:#666; font-size:11px; font-weight:bold;">${hours}</small></div>
-                <div style="text-align:right">
-                    <b style="font-size:16px; color:#0f172a;">${item.person.name}</b><br>
-                    <span style="color:#0ea5e9; font-weight:900; font-size:14px; display:block; margin:4px 0;">${item.person.phone}</span>
-                    <div style="display:flex; gap:5px; justify-content:flex-end;">
-                        <a href="tel:${item.person.phone}" style="background:#16a34a; color:white; text-decoration:none; padding:6px 12px; border-radius:10px; font-size:11px; font-weight:900; display:inline-block;">📞 CALL</a>
-                        <a href="viber://chat?number=%2B995${item.person.phone.slice(-9)}" style="background:#7360f2; color:white; text-decoration:none; padding:6px 12px; border-radius:10px; font-size:11px; font-weight:900; display:inline-block;">💜 VIBER</a>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-
-        const fullHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-            <style>
-                body{font-family:system-ui,-apple-system,sans-serif; background:#f8fafc; padding:20px; display:flex; justify-content:center;}
-                #canvas{width:100%; max-width:720px; background:white; border-radius:45px; padding:35px; box-shadow:0 30px 60px rgba(0,0,0,0.1);}
-                .live-banner{background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%); color:white; padding:30px; border-radius:35px; text-align:center; margin-bottom:25px;}
-                .big-date{font-size:42px; font-weight:900; color:#0ea5e9; margin-bottom:8px;}
-                .live-name{font-size:24px; font-weight:800; margin-bottom:5px;}
-                .priority-box{display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:20px;}
-            </style></head>
-            <body>
-                <div id="canvas">
-                    <div class="live-banner">
-                        <div class="big-date">${document.getElementById('liveD').innerText}</div>
-                        <div class="live-name">${document.getElementById('liveN').innerText}</div>
-                        <div style="font-size:30px; color:#0ea5e9; font-weight:900; margin:10px 0;">${document.getElementById('liveP').innerText}</div>
-                        <div style="display:flex; gap:15px; justify-content:center; margin-top:15px;">
-                            <a href="${document.getElementById('liveC').href}" style="background:#16a34a; color:white; text-decoration:none; padding:12px 25px; border-radius:15px; font-weight:800;">📞 CALL</a>
-                            <a href="${document.getElementById('liveV').href}" style="background:#7360f2; color:white; text-decoration:none; padding:12px 25px; border-radius:15px; font-weight:800;">💜 VIBER</a>
-                        </div>
-                    </div>
-                    <div class="priority-box">
-                        ${getPriorityHTML('🏔️ დასავლეთი', west, '#f59e0b')}
-                        ${getPriorityHTML('☀️ აღმოსავლეთი', east, '#ea580c')}
-                        <div style="background:#334155; padding:15px; border-radius:28px; color:white; text-align:center; min-height:160px; border:2px dashed rgba(255,255,255,0.3)">
-                            <small style="text-transform:uppercase; font-size:10px; display:block; margin-bottom:10px;">📞 ქოლცენტრი</small>
-                            <b style="font-size:24px; margin:15px 0; display:block;">${document.getElementById('ccNum').value}</b>
-                            <span style="font-size:11px; font-weight:800;">09:00 - 18:00</span>
-                        </div>
-                    </div>
-                    ${document.getElementById('noteBox').style.display !== 'none' ? `<div style="padding:20px; border-radius:25px; border-left:8px solid ${document.getElementById('noteClr').value}; margin-bottom:25px; background:#f1f5f9; font-weight:800; color:#1e293b;">${document.getElementById('noteTxt').value}</div>` : ''}
-                    <div id="scheduleBody">${finalRows}</div>
-                </div>
-            </body></html>`;
-
-        const el = document.createElement('textarea'); el.value = fullHTML; document.body.appendChild(el); el.select();
+        const style = `
+        <style>
+            body{font-family:system-ui,sans-serif; background:#f8fafc; display:flex; justify-content:center; padding:20px;}
+            #canvas{width:100%; max-width:720px; background:white; border-radius:45px; padding:35px; box-shadow:0 30px 60px rgba(0,0,0,0.1);}
+            @keyframes pulse { 0%{transform:scale(1); box-shadow:0 0 0 0 ${brd}b3;} 50%{transform:scale(1.02); box-shadow:0 0 30px 10px ${brd}66;} 100%{transform:scale(1); box-shadow:0 0 0 0 ${brd}00;} }
+            .live-banner{ background:${bg}; border:5px solid ${brd}; color:white; border-radius:35px; text-align:center; padding:35px; margin-bottom:25px; animation: pulse 3s infinite ease-in-out; }
+            .priority-box{display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:20px;}
+            .p-card{background:#475569; padding:15px; border-radius:28px; color:white; text-align:center; font-size:11px;}
+            .row{padding:20px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;}
+            .btn-call{background:#16a34a; color:white; padding:10px 20px; border-radius:12px; text-decoration:none; font-weight:800; display:inline-block;}
+            .btn-viber{background:#7360f2; color:white; padding:10px 20px; border-radius:12px; text-decoration:none; font-weight:800; display:inline-block;}
+            small{text-transform:uppercase; font-size:10px; display:block; margin-bottom:10px;}
+        </style>`;
+        
+        const finalHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8">${style}</head><body>${canvas.outerHTML}</body></html>`;
+        const el = document.createElement('textarea'); el.value = finalHTML; document.body.appendChild(el); el.select();
         document.execCommand('copy'); document.body.removeChild(el);
-        alert("✅ საბოლოო ვერსია (პასუხისმგებლების ღილაკებით) დაკოპირებულია!");
+        alert("✅ ანიმაციური კოდი დაკოპირებულია!");
     }
+
+    window.onload = () => { document.getElementById('workMonth').value = new Date().toISOString().slice(0, 7); render(); updateStyle(); };
 </script>
 </body>
 </html>
