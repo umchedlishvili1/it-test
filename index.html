@@ -2,7 +2,7 @@
 <html lang="ka">
 <head>
     <meta charset="UTF-8">
-    <title>Duty Manager Pro - Full Control & Comms</title>
+    <title>Duty Manager Pro - Regional Color Control</title>
     <style>
         :root { --dark: #0f172a; --blue: #38bdf8; --green: #16a34a; --viber: #7360f2; --bg: #f8fafc; --alert: #ef4444; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--bg); overflow: hidden; }
@@ -29,7 +29,7 @@
         .live-name { font-size: 28px; font-weight: 800; margin-bottom: 5px; color: #fff; }
         
         .priority-box { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .p-card { padding: 15px; border-radius: 28px; color: white; text-align: center; min-height: 160px; display: flex; flex-direction: column; background: #475569; }
+        .p-card { padding: 15px; border-radius: 28px; color: white; text-align: center; min-height: 160px; display: flex; flex-direction: column; background: #475569; transition: background 0.3s; }
         .p-info { background: rgba(255,255,255,0.1); padding: 10px 5px; border-radius: 18px; margin-bottom: 8px; font-size: 13px; }
         
         .btn-m { text-decoration: none; padding: 5px 10px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; margin: 2px; font-size: 10px; font-weight: 900; border: none; cursor: pointer; }
@@ -55,6 +55,7 @@
     <div class="box">
         <h3>🎨 დიზაინის მართვა</h3>
         <div class="color-ctrl">ბანერის ფონი <input type="color" id="clrBg" value="#0f172a" oninput="updateUIStyles()"></div>
+        <div class="color-ctrl">რეგიონების ფერი <input type="color" id="clrReg" value="#475569" oninput="updateUIStyles()"></div>
         <div class="color-ctrl">კანტის ფერი <input type="color" id="clrBorder" value="#ef4444" oninput="updateUIStyles()"></div>
         <div class="color-ctrl">თარიღის ფერი <input type="color" id="clrText" value="#38bdf8" oninput="updateUIStyles()"></div>
         <div class="color-ctrl">სახელის ფერი <input type="color" id="clrName" value="#ffffff" oninput="updateUIStyles()"></div>
@@ -79,14 +80,14 @@
     </div>
 
     <div class="box">
-        <h3>🏔️ რეგიონალური მენეჯერები</h3>
+        <h3>🏔️ რეგიონალების მართვა</h3>
         <select id="regType">
-            <option value="west">🏔️ დასავლეთი</option>
-            <option value="east">☀️ აღმოსავლეთი</option>
+            <option value="west">დასავლეთი</option>
+            <option value="east">აღმოსავლეთი</option>
         </select>
         <input type="text" id="regName" placeholder="სახელი გვარი">
         <input type="text" id="regPhone" placeholder="ტელეფონი">
-        <button class="btn-gen" onclick="addItem('regional')">+ რეგიონალის დამატება</button>
+        <button class="btn-gen" onclick="addItem('regional')">+ დამატება</button>
         <div id="regListUI" style="margin-top:10px;"></div>
     </div>
 
@@ -125,16 +126,11 @@
     let staff = [
         { name: "გიორგი ლომიძე", phone: "555558222" },
         { name: "ვასილ გოგალაძე", phone: "557949827" },
-        { name: "შალვა გაგნიძე", phone: "551770200" },
-        { name: "გიორგი ტარყაშვილი", phone: "577385250" },
-        { name: "გუგა ბალანჩივაძე", phone: "577978792" },
-        { name: "გიორგი ბოჭორიშვილი", phone: "591927831" },
-        { name: "ბექა ტალახაძე", phone: "551982772" },
-        { name: "ალიკა ყალიჩავა", phone: "551688899" }
+        { name: "შალვა გაგნიძე", phone: "551770200" }
     ];
 
     let west = [{name: "ზაალ გვეტაძე", phone: "568230917"}];
-    let east = [{name: "თემო გელაშვილი", phone: "577698890"}, {name: "უჩა მჭედლიშვილი", phone: "599470033"}];
+    let east = [{name: "თემო გელაშვილი", phone: "577698890"}];
     let schedule = [];
     const months = ["იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი", "ივლისი", "აგვისტო", "სექტემბერი", "ოქტომბერი", "ნოემბერი", "დეკემბერი"];
 
@@ -146,6 +142,7 @@
 
     function updateUIStyles() {
         const bg = document.getElementById('clrBg').value;
+        const regBg = document.getElementById('clrReg').value;
         const brd = document.getElementById('clrBorder').value;
         const txt = document.getElementById('clrText').value;
         const nme = document.getElementById('clrName').value;
@@ -153,6 +150,10 @@
         const banner = document.getElementById('liveBanner');
         banner.style.background = bg;
         banner.style.borderColor = brd;
+        
+        document.getElementById('wBox').style.background = regBg;
+        document.getElementById('eBox').style.background = regBg;
+
         document.getElementById('liveD').style.color = txt;
         document.getElementById('liveP').style.color = txt;
         document.getElementById('liveN').style.color = nme;
@@ -201,12 +202,12 @@
     function render() {
         document.getElementById('staffListUI').innerHTML = staff.map((s, i) => `<div class="s-item">${s.name} <span class="del" onclick="staff.splice(${i},1);render()">✕</span></div>`).join('');
         document.getElementById('regListUI').innerHTML = 
-            west.map((s, i) => `<div class="s-item">W: ${s.name} <span class="del" onclick="west.splice(${i},1);render()">✕</span></div>`).join('') +
-            east.map((s, i) => `<div class="s-item">E: ${s.name} <span class="del" onclick="east.splice(${i},1);render()">✕</span></div>`).join('');
+            west.map((s, i) => `<div class="s-item">დას: ${s.name} <span class="del" onclick="west.splice(${i},1);render()">✕</span></div>`).join('') +
+            east.map((s, i) => `<div class="s-item">აღმ: ${s.name} <span class="del" onclick="east.splice(${i},1);render()">✕</span></div>`).join('');
 
         const getViberLink = (phone) => `viber://chat?number=%2B995${phone.replace(/\s+/g, '').slice(-9)}`;
 
-        const drawP = (list, title) => `<small style="text-transform:uppercase; font-size:10px; display:block; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px;">${title}</small>` + 
+        const drawP = (list, title) => `<small style="text-transform:uppercase; font-size:9px; display:block; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px; font-weight:800;">${title}</small>` + 
             list.map(p => `
                 <div class="p-info">
                     <b>${p.name}</b><br>${p.phone}
@@ -216,9 +217,9 @@
                     </div>
                 </div>`).join('');
 
-        document.getElementById('wBox').innerHTML = drawP(west, "🏔️ დასავლეთი");
-        document.getElementById('eBox').innerHTML = drawP(east, "☀️ აღმოსავლეთი");
-        document.getElementById('cBox').innerHTML = `<small style="text-transform:uppercase; font-size:10px;">📞 ქოლცენტრი</small><b style="font-size:24px; margin:15px 0; display:block;">${document.getElementById('ccNum').value}</b><small>09:00 - 18:00</small>`;
+        document.getElementById('wBox').innerHTML = drawP(west, "დასავლეთის პასუხისმგებელი პირები");
+        document.getElementById('eBox').innerHTML = drawP(east, "აღმოსავლეთის პასუხისმგებელი პირები");
+        document.getElementById('cBox').innerHTML = `<small style="text-transform:uppercase; font-size:9px; font-weight:800;">📞 ქოლცენტრი</small><b style="font-size:24px; margin:15px 0; display:block;">${document.getElementById('ccNum').value}</b><small>09:00 - 18:00</small>`;
 
         const nBox = document.getElementById('noteBox'), nTxt = document.getElementById('noteTxt').value;
         nBox.style.display = nTxt ? 'block' : 'none'; nBox.innerText = nTxt; nBox.style.borderColor = document.getElementById('clrBorder').value;
@@ -265,6 +266,7 @@
         });
         
         const brd = document.getElementById('clrBorder').value;
+        const regBg = document.getElementById('clrReg').value;
         const finalHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
             body{font-family:system-ui; background:#f8fafc; display:flex; justify-content:center; padding:20px;}
             #canvas{width:100%; max-width:720px; background:white; border-radius:45px; padding:35px; box-shadow:0 30px 60px rgba(0,0,0,0.1);}
@@ -273,7 +275,7 @@
             .big-date{font-size:48px; font-weight:900; color:${document.getElementById('clrText').value}; margin-bottom:10px;}
             .live-name{font-size:28px; font-weight:800; color:${document.getElementById('clrName').value};}
             .priority-box{display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:20px;}
-            .p-card{background:#475569; padding:15px; border-radius:28px; color:white; text-align:center; font-size:11px;}
+            .p-card{background:${regBg}; padding:15px; border-radius:28px; color:white; text-align:center; font-size:10px;}
             .p-info{background:rgba(255,255,255,0.1); padding:10px 5px; border-radius:18px; margin-bottom:8px;}
             .row{padding:15px 20px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;}
             .btn-m{text-decoration:none; padding:8px 15px; border-radius:10px; font-weight:800; display:inline-block; margin:2px; background:#16a34a; color:white; font-size:10px;}
@@ -282,7 +284,7 @@
         
         const el = document.createElement('textarea'); el.value = finalHTML; document.body.appendChild(el); el.select();
         document.execCommand('copy'); document.body.removeChild(el);
-        alert("✅ სრული კოდი დაკოპირებულია!");
+        alert("✅ დიზაინი შენახულია და კოდი დაკოპირებულია!");
     }
 </script>
 </body>
