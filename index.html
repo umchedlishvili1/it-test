@@ -7,13 +7,11 @@
         :root { --dark: #0f172a; --blue: #0ea5e9; --green: #16a34a; --viber: #7360f2; --bg: #f8fafc; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--bg); overflow: hidden; }
         
-        /* მართვის პანელი */
         #sidebar { width: 380px; background: var(--dark); color: white; padding: 25px; overflow-y: auto; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,0.1); }
         .box { background: rgba(255,255,255,0.07); padding: 18px; border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
         h3 { color: var(--blue); font-size: 12px; text-transform: uppercase; margin: 0 0 15px 0; letter-spacing: 2px; font-weight: 800; }
         input, textarea, select { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px; border: none; font-weight: 700; box-sizing: border-box; font-size: 14px; }
         
-        /* პრევიუ */
         #main { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
         #canvas { width: 100%; max-width: 720px; background: white; border-radius: 45px; padding: 35px; box-shadow: 0 30px 60px rgba(15, 23, 42, 0.15); }
         
@@ -28,16 +26,14 @@
         .p-info b { font-size: 13px; display: block; margin-bottom: 2px; }
         .p-info span { font-size: 12px; font-weight: 800; display: block; margin-bottom: 5px; }
         
-        .btn-m { text-decoration: none; width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--dark); margin: 2px; font-size: 14px; transition: 0.2s; border: none; }
-        .btn-m:hover { transform: scale(1.1); }
+        .btn-m { text-decoration: none; padding: 4px 10px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--dark); margin: 2px; font-size: 11px; font-weight: 900; transition: 0.2s; border: none; }
+        .btn-m:hover { transform: scale(1.05); }
         
         .row { padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
         .today-row { background: #f0f9ff; border-left: 8px solid var(--blue); border-radius: 0 20px 20px 0; transform: scale(1.02); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .row b { font-size: 16px; font-weight: 800; color: #334155; }
-
+        
         .btn-gen { background: var(--blue); color: white; width: 100%; padding: 14px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; font-size: 14px; }
         .btn-export { background: var(--green); color: white; width: 720px; padding: 20px; border-radius: 25px; border: none; font-weight: 900; cursor: pointer; margin-top: 20px; font-size: 18px; letter-spacing: 1px; box-shadow: 0 10px 20px rgba(22, 163, 74, 0.2); }
-        
         .s-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 12px; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
         .del { color: #ff4757; cursor: pointer; font-size: 18px; padding-left: 10px; }
     </style>
@@ -90,8 +86,8 @@
             <div id="liveN" class="live-name">- - -</div>
             <a id="liveP" href="#" style="font-size:30px; color:var(--green); font-weight:900; text-decoration:none; display:block; margin:10px 0;">---</a>
             <div style="display:flex; gap:15px; justify-content:center; margin-top:15px;">
-                <a id="liveC" href="#" class="btn-gen" style="background:var(--green); width:120px; text-decoration:none;">📞 CALL</a>
-                <a id="liveV" href="#" class="btn-gen" style="background:var(--viber); width:120px; text-decoration:none;">💜 VIBER</a>
+                <a id="liveC" href="#" class="btn-gen" style="background:var(--green); width:130px; text-decoration:none; display:flex; align-items:center; justify-content:center;">📞 CALL</a>
+                <a id="liveV" href="#" class="btn-gen" style="background:var(--viber); width:130px; text-decoration:none; display:flex; align-items:center; justify-content:center;">💜 VIBER</a>
             </div>
         </div>
 
@@ -108,7 +104,6 @@
 </div>
 
 <script>
-    // თქვენი პერსონალის სია
     let staff = [
         { name: "გიორგი ლომიძე", phone: "555558222" },
         { name: "ვასილ გოგალაძე", phone: "557949827" },
@@ -121,8 +116,7 @@
     ];
 
     let west = [{name: "ზაალ გვეტაძე", phone: "568230917"}];
-    let east = [{name: "თემო გელაშვილი", phone: "577698890"}];
-    let east = [{name: "უჩა მჭედლიშვილი", phone: "599470033"}];
+    let east = [{name: "თემო გელაშვილი", phone: "577698890"}, {name: "უჩა მჭედლიშვილი", phone: "599470033"}];
     let schedule = [];
     const months = ["იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი", "ივლისი", "აგვისტო", "სექტემბერი", "ოქტომბერი", "ნოემბერი", "დეკემბერი"];
 
@@ -167,7 +161,8 @@
             west.map((s, i) => `<div class="s-item" style="color:#f59e0b">W: ${s.name} <span class="del" onclick="west.splice(${i},1);render()">✕</span></div>`).join('') +
             east.map((s, i) => `<div class="s-item" style="color:#ea580c">E: ${s.name} <span class="del" onclick="east.splice(${i},1);render()">✕</span></div>`).join('');
 
-        const drawP = (list) => list.map(p => `<div class="p-info"><b>${p.name}</b><span>${p.phone}</span><div style="margin-top:3px;"><a href="tel:${p.phone}" class="btn-m">📞</a><a href="viber://chat?number=%2B995${p.phone.slice(-9)}" class="btn-m">V</a></div></div>`).join('');
+        const drawP = (list) => list.map(p => `<div class="p-info"><b>${p.name}</b><span>${p.phone}</span><div style="margin-top:3px;"><a href="tel:${p.phone}" class="btn-m">📞 CALL</a><a href="viber://chat?number=%2B995${p.phone.slice(-9)}" class="btn-m">💜 VIBER</a></div></div>`).join('');
+        
         document.getElementById('wBox').innerHTML = `<small>🏔️ დასავლეთი</small>` + drawP(west);
         document.getElementById('eBox').innerHTML = `<small>☀️ აღმოსავლეთი</small>` + drawP(east);
         document.getElementById('cBox').innerHTML = `<small>📞 ქოლცენტრი</small><b style="font-size:24px; margin:15px 0; display:block;">${document.getElementById('ccNum').value}</b><span style="font-size:11px; font-weight:800;">09:00 - 18:00</span>`;
@@ -177,11 +172,14 @@
 
         const mVal = document.getElementById('workMonth').value;
         if(mVal && schedule.length) {
-            const mName = months[parseInt(mVal.split('-')[1])-1];
+            const year = parseInt(mVal.split('-')[0]), month = parseInt(mVal.split('-')[1]) - 1;
+            const mName = months[month];
             const today = new Date().getDate(), currM = new Date().getMonth() + 1;
             
             document.getElementById('scheduleBody').innerHTML = schedule.map((item, idx) => {
-                let isToday = (item.day === today && parseInt(mVal.split('-')[1]) === currM);
+                const dateObj = new Date(year, month, item.day);
+                const hours = (dateObj.getDay() === 0 || dateObj.getDay() === 6) ? "06:00 - 06:00" : "18:00 - 06:00";
+                let isToday = (item.day === today && (month + 1) === currM);
                 if(isToday) {
                     document.getElementById('liveD').innerText = `${item.day} ${mName}`;
                     document.getElementById('liveN').innerText = item.person.name;
@@ -190,13 +188,12 @@
                     document.getElementById('liveV').href = "viber://chat?number=%2B995"+item.person.phone.slice(-9);
                 }
                 return `<div class="row ${isToday ? 'today-row' : ''}">
-                    <b>${item.day} ${mName}</b>
+                    <div><b>${item.day} ${mName}</b><br><small style="font-size:11px; color:#64748b; font-weight:800;">${hours}</small></div>
                     <div style="text-align:right">
                         <select style="width:160px; font-size:12px;" onchange="updateDayPerson(${idx}, this.value)">
                             ${staff.map(s => `<option value="${s.name}" ${s.name === item.person.name ? 'selected' : ''}>${s.name}</option>`).join('')}
                         </select>
                         <div style="font-size:14px; font-weight:900; color:var(--blue); margin-top:5px;">${item.person.phone}</div>
-                        <div style="margin-top:5px;"><a href="tel:${item.person.phone}" class="btn-m" style="background:var(--green); color:white;">📞</a><a href="viber://chat?number=%2B995${item.person.phone.slice(-9)}" class="btn-m" style="background:var(--viber); color:white;">V</a></div>
                     </div>
                 </div>`;
             }).join('');
@@ -205,16 +202,17 @@
 
     function exportFinal() {
         const mVal = document.getElementById('workMonth').value;
-        const mName = months[parseInt(mVal.split('-')[1])-1];
-        const finalRows = schedule.map(item => `
-            <div class="row">
-                <b>${item.day} ${mName}</b>
-                <div style="text-align:right">
-                    <b style="font-size:16px;">${item.person.name}</b><br>
-                    <span style="font-size:14px; font-weight:900; color:#0ea5e9;">${item.person.phone}</span>
-                    <div style="margin-top:5px;"><a href="tel:${item.person.phone}" class="btn-m" style="background:#16a34a; color:white;">📞</a><a href="viber://chat?number=%2B995${item.person.phone.slice(-9)}" class="btn-m" style="background:#7360f2; color:white;">V</a></div>
-                </div>
-            </div>`).join('');
+        const year = parseInt(mVal.split('-')[0]), month = parseInt(mVal.split('-')[1]) - 1;
+        const mName = months[month];
+        const finalRows = schedule.map(item => {
+            const dateObj = new Date(year, month, item.day);
+            const hours = (dateObj.getDay() === 0 || dateObj.getDay() === 6) ? "06:00 - 06:00" : "18:00 - 06:00";
+            return `
+            <div class="row" style="padding:20px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+                <div><b>${item.day} ${mName}</b><br><small style="color:#666;">${hours}</small></div>
+                <div style="text-align:right"><b>${item.person.name}</b><br><span style="color:#0ea5e9; font-weight:900;">${item.person.phone}</span></div>
+            </div>`;
+        }).join('');
 
         const finalContent = `
             <div id="canvas" style="max-width:720px; background:white; border-radius:45px; padding:35px; margin:auto; box-shadow:0 30px 60px rgba(0,0,0,0.1);">
@@ -233,8 +231,8 @@
                 .priority-box{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin-bottom:20px;}
                 .p-card{padding:15px;border-radius:28px;color:white;text-align:center;min-height:160px;}
                 .p-info{background:rgba(255,255,255,0.15);padding:10px;border-radius:18px;margin-bottom:8px;}
-                .btn-m{text-decoration:none;width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;margin:2px;}
-                .btn-gen{display:none;}
+                .btn-m{text-decoration:none;padding:4px 10px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:white;color:#0f172a;margin:2px;font-size:11px;font-weight:900;}
+                .btn-gen{background:#0ea5e9;color:white;padding:14px;border:none;border-radius:15px;font-weight:800;font-size:14px;text-decoration:none;display:flex;align-items:center;justify-content:center;}
                 .row{padding:20px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;}
                 small{font-weight:900;text-transform:uppercase;font-size:10px;display:block;margin-bottom:10px;}
             </style></head><body>${finalContent}</body></html>`;
