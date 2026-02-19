@@ -261,30 +261,42 @@
 
     function exportFinal() {
         const canvas = document.getElementById('canvas').cloneNode(true);
-        canvas.querySelectorAll('.edit-select').forEach(sel => {
-            sel.outerHTML = `<b style="font-size:16px; display:block; color:#0f172a; margin-bottom:4px;">${sel.value}</b>`;
+        
+        // სელექტების ჩანაცვლება ტექსტით და საათების შენარჩუნება
+        canvas.querySelectorAll('.row').forEach(row => {
+            const select = row.querySelector('.edit-select');
+            if(select) {
+                const nameText = select.value;
+                select.outerHTML = `<b style="font-size:16px; display:block; color:#0f172a; margin-bottom:4px;">${nameText}</b>`;
+            }
         });
         
         const brd = document.getElementById('clrBorder').value;
         const regBg = document.getElementById('clrReg').value;
+        const bg = document.getElementById('clrBg').value;
+        const txtColor = document.getElementById('clrText').value;
+        const nameColor = document.getElementById('clrName').value;
+
         const finalHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
-            body{font-family:system-ui; background:#f8fafc; display:flex; justify-content:center; padding:20px;}
+            body{font-family:system-ui, -apple-system, sans-serif; background:#f8fafc; display:flex; justify-content:center; padding:20px;}
             #canvas{width:100%; max-width:720px; background:white; border-radius:45px; padding:35px; box-shadow:0 30px 60px rgba(0,0,0,0.1);}
-            .live-banner{background:${document.getElementById('clrBg').value}; color:white; border-radius:35px; text-align:center; padding:35px; margin-bottom:25px; border:5px solid ${brd}; animation: p 3s infinite ease-in-out;}
+            .live-banner{background:${bg}; color:white; border-radius:35px; text-align:center; padding:35px; margin-bottom:25px; border:5px solid ${brd}; animation: p 3s infinite ease-in-out;}
             @keyframes p { 0%{transform:scale(1); box-shadow:0 0 0 0 ${brd}b3;} 50%{transform:scale(1.01); box-shadow:0 0 20px 5px ${brd}66;} 100%{transform:scale(1);} }
-            .big-date{font-size:48px; font-weight:900; color:${document.getElementById('clrText').value}; margin-bottom:10px;}
-            .live-name{font-size:28px; font-weight:800; color:${document.getElementById('clrName').value};}
+            .big-date{font-size:48px; font-weight:900; color:${txtColor}; margin-bottom:10px;}
+            .live-name{font-size:28px; font-weight:800; color:${nameColor};}
             .priority-box{display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:20px;}
-            .p-card{background:${regBg}; padding:15px; border-radius:28px; color:white; text-align:center; font-size:10px;}
+            .p-card{background:${regBg}; padding:15px; border-radius:28px; color:white; text-align:center; font-size:10px; min-height:160px;}
             .p-info{background:rgba(255,255,255,0.1); padding:10px 5px; border-radius:18px; margin-bottom:8px;}
             .row{padding:15px 20px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;}
+            .today-row{background: #fef2f2; border-left: 8px solid ${brd}; border-radius: 0 20px 20px 0;}
             .btn-m{text-decoration:none; padding:8px 15px; border-radius:10px; font-weight:800; display:inline-block; margin:2px; background:#16a34a; color:white; font-size:10px;}
             .btn-viber{background:#7360f2 !important;}
+            #noteBox{border-left:8px solid ${brd} !important;}
         </style></head><body>${canvas.outerHTML}</body></html>`;
         
         const el = document.createElement('textarea'); el.value = finalHTML; document.body.appendChild(el); el.select();
         document.execCommand('copy'); document.body.removeChild(el);
-        alert("✅ დიზაინი შენახულია და კოდი დაკოპირებულია!");
+        alert("✅ კოდი დაკოპირებულია! სამუშაო საათები (18:00-06:00 და 06:00-06:00) შენარჩუნებულია.");
     }
 </script>
 </body>
