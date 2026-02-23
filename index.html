@@ -2,7 +2,7 @@
 <html lang="ka">
 <head>
     <meta charset="UTF-8">
-    <title>Duty Manager Pro - Regional Color Control</title>
+    <title>Duty Manager Pro - Live Sync</title>
     <style>
         :root { --dark: #0f172a; --blue: #38bdf8; --green: #16a34a; --viber: #7360f2; --bg: #f8fafc; --alert: #ef4444; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--bg); overflow: hidden; }
@@ -31,7 +31,7 @@
         .btn-viber { background: var(--viber) !important; color: white !important; }
         
         .row { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-        .today-row { background: #fef2f2; border-left: 8px solid var(--alert); border-radius: 0 20px 20px 0; }
+        .today-row { background: #fef2f2 !important; border-left: 8px solid var(--alert) !important; border-radius: 0 20px 20px 0; }
         
         .btn-gen { background: #334155; color: white; width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; }
         .s-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 10px; margin-bottom: 5px; font-size: 11px; }
@@ -118,7 +118,7 @@
 
 <script>
     let staff = [
-         { name: "გიორგი ლომიძე", phone: "555558222" },
+        { name: "გიორგი ლომიძე", phone: "555558222" },
         { name: "ვასილ გოგალაძე", phone: "557949827" },
         { name: "შალვა გაგნიძე", phone: "551770200" },
         { name: "გიორგი ტარყაშვილი", phone: "577385250" },
@@ -263,6 +263,10 @@
 
     function exportFinal() {
         const canvas = document.getElementById('canvas').cloneNode(true);
+        const scheduleJSON = JSON.stringify(schedule);
+        const monthsJSON = JSON.stringify(months);
+        const monthVal = document.getElementById('workMonth').value;
+
         canvas.querySelectorAll('.row').forEach(row => {
             const select = row.querySelector('.edit-select');
             if(select) {
@@ -287,16 +291,53 @@
             .priority-box{display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:20px;}
             .p-card{background:${regBg}; padding:15px; border-radius:28px; color:white; text-align:center; min-height:180px;}
             .p-info{background:rgba(255,255,255,0.1); padding:12px 5px; border-radius:18px; margin-bottom:8px;}
-            .row{padding:15px 20px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;}
-            .today-row{background: #fef2f2; border-left: 8px solid ${brd}; border-radius: 0 20px 20px 0;}
+            .row{padding:15px 20px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; transition: 0.3s;}
+            .today-row{background: #fef2f2 !important; border-left: 8px solid ${brd} !important; border-radius: 0 20px 20px 0;}
             .btn-m{text-decoration:none; padding:8px 15px; border-radius:10px; font-weight:800; display:inline-block; margin:2px; background:#16a34a; color:white; font-size:10px;}
             .btn-viber{background:#7360f2 !important;}
             #noteBox{border-left:8px solid ${brd} !important;}
-        </style></head><body>${canvas.outerHTML}</body></html>`;
+        </style></head><body>
+        ${canvas.outerHTML}
+        <script>
+            const schedule = ${scheduleJSON};
+            const months = ${monthsJSON};
+            const targetMonthStr = "${monthVal}";
+
+            function updateLiveSync() {
+                const now = new Date();
+                const d = now.getDate();
+                const m = now.getMonth();
+                const targetMonth = parseInt(targetMonthStr.split('-')[1]) - 1;
+
+                // ვასუფთავებთ ძველ მონიშვნას
+                document.querySelectorAll('.row').forEach(r => r.classList.remove('today-row'));
+
+                const todayData = schedule.find(i => i.day === d && targetMonth === m);
+                if(todayData) {
+                    document.getElementById('liveD').innerText = todayData.day + " " + months[targetMonth];
+                    document.getElementById('liveN').innerText = todayData.person.name;
+                    document.getElementById('liveP').innerText = todayData.person.phone;
+                    document.getElementById('liveP').href = "tel:" + todayData.person.phone;
+                    document.getElementById('liveC').href = "tel:" + todayData.person.phone;
+                    document.getElementById('liveV').href = "viber://chat?number=%2B995" + todayData.person.phone.replace(/\\s+/g, '').slice(-9);
+                    
+                    // ცხრილში მონიშვნა
+                    const rows = document.querySelectorAll('.row');
+                    rows.forEach(row => {
+                        if(row.innerText.includes(todayData.day + " " + months[targetMonth])) {
+                            row.classList.add('today-row');
+                        }
+                    });
+                }
+            }
+            updateLiveSync();
+            setInterval(updateLiveSync, 60000);
+        <\/script>
+        </body></html>`;
         
         const el = document.createElement('textarea'); el.value = finalHTML; document.body.appendChild(el); el.select();
         document.execCommand('copy'); document.body.removeChild(el);
-        alert("✅ კოდი დაკოპირებულია!");
+        alert("✅ დინამიური კოდი დაკოპირებულია!");
     }
 </script>
 </body>
