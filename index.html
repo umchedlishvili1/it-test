@@ -41,11 +41,17 @@
         .color-ctrl input { width: 50px; height: 30px; padding: 0; cursor: pointer; border: none; background: none; }
         
         .edit-select { width: 170px; font-size: 12px; padding: 5px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 700; background: #fff; margin-bottom: 5px; }
+        .count-badge { background: var(--blue); color: #000; padding: 2px 6px; border-radius: 6px; font-weight: 900; margin-left: 5px; }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
+    <div class="box">
+        <h3>📊 მორიგეობების რაოდენობა</h3>
+        <div id="statsList" style="font-size: 12px;"></div>
+    </div>
+
     <div class="box">
         <h3>🎨 დიზაინის მართვა</h3>
         <div class="color-ctrl">ბანერის ფონი <input type="color" id="clrBg" value="#0f172a" oninput="updateUIStyles()"></div>
@@ -134,7 +140,7 @@
         {name: "უჩა მჭედლიშვილი", phone: "599470033"}
     ];
     let schedule = [];
-    const months = ["იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი", "ივლისი", "აგვისტო", "სექტემბერი", "ოქტომბერი", "ნოემბერი", "დეკემბერი"];
+    const months = ["იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი", "ივლისი", "აგვისტო", "სექტემბერი", "ოქტომბერი", "ნოევმბერი", "დეკემბერი"];
 
     window.onload = () => {
         document.getElementById('workMonth').value = new Date().toISOString().slice(0, 7);
@@ -202,6 +208,15 @@
     }
 
     function render() {
+        // Stats Calculation
+        const counts = {};
+        schedule.forEach(item => {
+            counts[item.person.name] = (counts[item.person.name] || 0) + 1;
+        });
+        document.getElementById('statsList').innerHTML = Object.entries(counts)
+            .sort((a,b) => b[1] - a[1])
+            .map(([name, count]) => `<div class="s-item">${name} <span class="count-badge">${count}</span></div>`).join('');
+
         document.getElementById('staffListUI').innerHTML = staff.map((s, i) => `<div class="s-item">${s.name} <span class="del" onclick="staff.splice(${i},1);render()">✕</span></div>`).join('');
         document.getElementById('regListUI').innerHTML = 
             west.map((s, i) => `<div class="s-item">დას: ${s.name} <span class="del" onclick="west.splice(${i},1);render()">✕</span></div>`).join('') +
@@ -245,7 +260,7 @@
                 document.getElementById('liveV').href = getViberLink(item.person.phone);
             }
 
-            return `<div class="row ${isToday ? 'today-row' : ''}">
+            return `<div class="row ${isToday ? 'today-row' : ''}" data-day="${item.day}">
                 <div><b>${item.day} ${months[month]}</b><br><small style="font-size:11px; color:#64748b;">${hours}</small></div>
                 <div style="text-align:right">
                     <select class="edit-select" onchange="changeDuty(${idx}, this.value)">
@@ -307,14 +322,24 @@
                 const now = new Date();
                 const d = now.getDate();
                 const m = now.getMonth();
-                const targetMonth = parseInt(targetMonthStr.split('-')[1]) - 1;
+                const y = now.getFullYear();
+                const [targetY, targetMStr] = targetMonthStr.split('-').map(Number);
+                const targetM = targetMStr - 1;
 
                 // ვასუფთავებთ ძველ მონიშვნას
-                document.querySelectorAll('.row').forEach(r => r.classList.remove('today-row'));
+                document.querySelectorAll('.row').forEach(r => {
+                    r.classList.remove('today-row');
+                    const rDay = parseInt(r.getAttribute('data-day'));
+                    
+                    // თუ თვე და წელი ემთხვევა, ვმალავთ წარსულ დღეებს
+                    if(y === targetY && m === targetM) {
+                        if(rDay < d) { r.style.display = 'none'; }
+                    }
+                });
 
-                const todayData = schedule.find(i => i.day === d && targetMonth === m);
+                const todayData = schedule.find(i => i.day === d && targetM === m && targetY === y);
                 if(todayData) {
-                    document.getElementById('liveD').innerText = todayData.day + " " + months[targetMonth];
+                    document.getElementById('liveD').innerText = todayData.day + " " + months[targetM];
                     document.getElementById('liveN').innerText = todayData.person.name;
                     document.getElementById('liveP').innerText = todayData.person.phone;
                     document.getElementById('liveP').href = "tel:" + todayData.person.phone;
@@ -324,7 +349,7 @@
                     // ცხრილში მონიშვნა
                     const rows = document.querySelectorAll('.row');
                     rows.forEach(row => {
-                        if(row.innerText.includes(todayData.day + " " + months[targetMonth])) {
+                        if(parseInt(row.getAttribute('data-day')) === d) {
                             row.classList.add('today-row');
                         }
                     });
@@ -337,7 +362,7 @@
         
         const el = document.createElement('textarea'); el.value = finalHTML; document.body.appendChild(el); el.select();
         document.execCommand('copy'); document.body.removeChild(el);
-        alert("✅ დინამიური კოდი დაკოპირებულია!");
+        alert("✅ დინამიური კოდი დაკოპირებულია! წარსული დღეები ავტომატურად დაიმალება.");
     }
 </script>
 </body>
