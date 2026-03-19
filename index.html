@@ -140,7 +140,7 @@
         {name: "უჩა მჭედლიშვილი", phone: "599470033"}
     ];
     let schedule = [];
-    const months = ["იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი", "ივლისი", "აგვისტო", "სექტემბერი", "ოქტომბერი", "ნოევმბერი", "დეკემბერი"];
+    const months = ["იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი", "ივლისი", "აგვისტო", "სექტემბერი", "ოქტომბერი", "ნოემბერი", "დეკემბერი"];
 
     window.onload = () => {
         document.getElementById('workMonth').value = new Date().toISOString().slice(0, 7);
@@ -208,7 +208,6 @@
     }
 
     function render() {
-        // Stats Calculation
         const counts = {};
         schedule.forEach(item => {
             counts[item.person.name] = (counts[item.person.name] || 0) + 1;
@@ -247,8 +246,6 @@
         const today = new Date().getDate(), currM = new Date().getMonth();
 
         document.getElementById('scheduleBody').innerHTML = schedule.map((item, idx) => {
-            const dateObj = new Date(year, month, item.day);
-            const hours = (dateObj.getDay() === 0 || dateObj.getDay() === 6) ? "06:00 - 06:00" : "18:00 - 06:00";
             let isToday = (item.day === today && month === currM);
             
             if(isToday) {
@@ -261,7 +258,7 @@
             }
 
             return `<div class="row ${isToday ? 'today-row' : ''}" data-day="${item.day}">
-                <div><b>${item.day} ${months[month]}</b><br><small style="font-size:11px; color:#64748b;">${hours}</small></div>
+                <div><b>${item.day} ${months[month]}</b></div>
                 <div style="text-align:right">
                     <select class="edit-select" onchange="changeDuty(${idx}, this.value)">
                         ${staff.map(s => `<option value="${s.name}" ${s.name === item.person.name ? 'selected' : ''}>${s.name}</option>`).join('')}
@@ -326,12 +323,9 @@
                 const [targetY, targetMStr] = targetMonthStr.split('-').map(Number);
                 const targetM = targetMStr - 1;
 
-                // ვასუფთავებთ ძველ მონიშვნას
                 document.querySelectorAll('.row').forEach(r => {
                     r.classList.remove('today-row');
                     const rDay = parseInt(r.getAttribute('data-day'));
-                    
-                    // თუ თვე და წელი ემთხვევა, ვმალავთ წარსულ დღეებს
                     if(y === targetY && m === targetM) {
                         if(rDay < d) { r.style.display = 'none'; }
                     }
@@ -346,7 +340,6 @@
                     document.getElementById('liveC').href = "tel:" + todayData.person.phone;
                     document.getElementById('liveV').href = "viber://chat?number=%2B995" + todayData.person.phone.replace(/\\s+/g, '').slice(-9);
                     
-                    // ცხრილში მონიშვნა
                     const rows = document.querySelectorAll('.row');
                     rows.forEach(row => {
                         if(parseInt(row.getAttribute('data-day')) === d) {
@@ -362,7 +355,7 @@
         
         const el = document.createElement('textarea'); el.value = finalHTML; document.body.appendChild(el); el.select();
         document.execCommand('copy'); document.body.removeChild(el);
-        alert("✅ დინამიური კოდი დაკოპირებულია! წარსული დღეები ავტომატურად დაიმალება.");
+        alert("✅ კოდი დაკოპირებულია! სამუშაო საათები ამოშლილია.");
     }
 </script>
 </body>
