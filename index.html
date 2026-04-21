@@ -323,14 +323,25 @@
                 const [targetY, targetMStr] = targetMonthStr.split('-').map(Number);
                 const targetM = targetMStr - 1;
 
+                // დინამიკური ფილტრაცია და სტილი
                 document.querySelectorAll('.row').forEach(r => {
-                    r.classList.remove('today-row');
                     const rDay = parseInt(r.getAttribute('data-day'));
+                    r.classList.remove('today-row');
+                    
                     if(y === targetY && m === targetM) {
-                        if(rDay < d) { r.style.display = 'none'; }
+                        // თუ გასული დღეა - ვმალავთ
+                        if(rDay < d) { 
+                            r.style.display = 'none'; 
+                        } else if(rDay === d) {
+                            // თუ დღევანდელი დღეა - ვნიშნავთ
+                            r.classList.add('today-row');
+                        } else {
+                            r.style.display = 'flex';
+                        }
                     }
                 });
 
+                // ბანერის განახლება
                 const todayData = schedule.find(i => i.day === d && targetM === m && targetY === y);
                 if(todayData) {
                     document.getElementById('liveD').innerText = todayData.day + " " + months[targetM];
@@ -339,23 +350,21 @@
                     document.getElementById('liveP').href = "tel:" + todayData.person.phone;
                     document.getElementById('liveC').href = "tel:" + todayData.person.phone;
                     document.getElementById('liveV').href = "viber://chat?number=%2B995" + todayData.person.phone.replace(/\\s+/g, '').slice(-9);
-                    
-                    const rows = document.querySelectorAll('.row');
-                    rows.forEach(row => {
-                        if(parseInt(row.getAttribute('data-day')) === d) {
-                            row.classList.add('today-row');
-                        }
-                    });
+                } else {
+                    // თუ დღეს მორიგეობა არაა (მაგ. პერიოდს გარეთაა)
+                    document.getElementById('liveD').innerText = "დღეს დასვენებაა";
+                    document.getElementById('liveN').innerText = "- - -";
+                    document.getElementById('liveP').innerText = "";
                 }
             }
             updateLiveSync();
-            setInterval(updateLiveSync, 60000);
+            setInterval(updateLiveSync, 60000); // განახლება ყოველ წუთში
         <\/script>
         </body></html>`;
         
         const el = document.createElement('textarea'); el.value = finalHTML; document.body.appendChild(el); el.select();
         document.execCommand('copy'); document.body.removeChild(el);
-        alert("✅ კოდი დაკოპირებულია! სამუშაო საათები ამოშლილია.");
+        alert("✅ კოდი დაკოპირებულია! Live Sync რეჟიმი გააქტიურებულია (გასული დღეები ავტომატურად დაიმალება).");
     }
 </script>
 </body>
