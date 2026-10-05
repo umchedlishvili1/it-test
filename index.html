@@ -1,378 +1,109 @@
 <!DOCTYPE html>
-<html lang="ka">
-<head>
-    <meta charset="UTF-8">
-    <title>Duty Manager Pro - Live Sync</title>
-    <style>
-        :root { --dark: #0f172a; --blue: #38bdf8; --green: #16a34a; --viber: #7360f2; --bg: #f8fafc; --alert: #ef4444; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; height: 100vh; background: var(--bg); overflow: hidden; }
-        
-        #sidebar { width: 380px; background: var(--dark); color: white; padding: 25px; overflow-y: auto; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,0.1); }
-        .box { background: rgba(255,255,255,0.07); padding: 18px; border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        h3 { color: var(--blue); font-size: 11px; text-transform: uppercase; margin: 0 0 15px 0; letter-spacing: 2px; font-weight: 800; }
-        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 12px; border: none; font-weight: 700; box-sizing: border-box; font-size: 14px; }
-        
-        #main { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
-        #canvas { width: 100%; max-width: 720px; background: white; border-radius: 45px; padding: 35px; box-shadow: 0 30px 60px rgba(15, 23, 42, 0.15); }
-        
-        .live-banner { 
-            background: #0f172a; color: white; padding: 35px; border-radius: 35px; text-align: center; 
-            margin-bottom: 25px; border: 5px solid var(--alert); animation: pulse-border 3s infinite ease-in-out;
-        }
-        .big-date { font-size: 48px; font-weight: 900; color: var(--blue); margin-bottom: 10px; }
-        .live-name { font-size: 28px; font-weight: 800; margin-bottom: 5px; color: #fff; }
-        
-        .priority-box { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .p-card { padding: 15px; border-radius: 28px; color: white; text-align: center; min-height: 180px; display: flex; flex-direction: column; background: #475569; transition: background 0.3s; }
-        .p-info { background: rgba(255,255,255,0.1); padding: 12px 5px; border-radius: 18px; margin-bottom: 8px; font-size: 13px; }
-        
-        .btn-m { text-decoration: none; padding: 6px 12px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; margin: 2px; font-size: 12px; font-weight: 900; border: none; cursor: pointer; }
-        .btn-call { background: var(--green) !important; color: white !important; }
-        .btn-viber { background: var(--viber) !important; color: white !important; }
-        
-        .row { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-        .today-row { background: #fef2f2 !important; border-left: 8px solid var(--alert) !important; border-radius: 0 20px 20px 0; }
-        
-        /* Weekend Styling */
-        .weekend-row { background: #f1f5f9; }
-        .weekend-label { color: #ef4444; font-size: 10px; display: block; text-transform: uppercase; }
-
-        .btn-gen { background: #334155; color: white; width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; }
-        .s-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 10px; margin-bottom: 5px; font-size: 11px; }
-        .del { color: #ff4757; cursor: pointer; font-weight: bold; padding-left: 10px; }
-        
-        .color-ctrl { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
-        .color-ctrl input { width: 50px; height: 30px; padding: 0; cursor: pointer; border: none; background: none; }
-        
-        .edit-select { width: 170px; font-size: 12px; padding: 5px; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 700; background: #fff; margin-bottom: 5px; }
-        .count-badge { background: var(--blue); color: #000; padding: 2px 6px; border-radius: 6px; font-weight: 900; margin-left: 5px; }
-    </style>
-</head>
-<body>
-
-<div id="sidebar">
-    <div class="box">
-        <h3>📊 მორიგეობების რაოდენობა</h3>
-        <div id="statsList" style="font-size: 12px;"></div>
-    </div>
-
-    <div class="box">
-        <h3>🎨 დიზაინის მართვა</h3>
-        <div class="color-ctrl">ბანერის ფონი <input type="color" id="clrBg" value="#0f172a" oninput="updateUIStyles()"></div>
-        <div class="color-ctrl">რეგიონების ფერი <input type="color" id="clrReg" value="#475569" oninput="updateUIStyles()"></div>
-        <div class="color-ctrl">კანტის ფერი <input type="color" id="clrBorder" value="#ef4444" oninput="updateUIStyles()"></div>
-        <div class="color-ctrl">თარიღის ფერი <input type="color" id="clrText" value="#38bdf8" oninput="updateUIStyles()"></div>
-        <div class="color-ctrl">სახელის ფერი <input type="color" id="clrName" value="#ffffff" oninput="updateUIStyles()"></div>
-    </div>
-
-    <div class="box">
-        <h3>📅 პერიოდი</h3>
-        <input type="month" id="workMonth">
-        <div style="display:flex; gap:10px;">
-            <input type="number" id="rangeStart" value="1">
-            <input type="number" id="rangeEnd" value="31">
-        </div>
-        <button class="btn-gen" style="background:var(--blue); color:#000" onclick="generateSchedule()">🔄 გენერირება</button>
-    </div>
-
-    <div class="box">
-        <h3>👥 მორიგე პერსონალი</h3>
-        <input type="text" id="stName" placeholder="სახელი გვარი">
-        <input type="text" id="stPhone" placeholder="ტელეფონი">
-        <button class="btn-gen" style="background:#6366f1" onclick="addItem('staff')">+ დამატება</button>
-        <div id="staffListUI" style="margin-top:10px; max-height: 120px; overflow-y: auto;"></div>
-    </div>
-
-    <div class="box">
-        <h3>🏔️ რეგიონალების მართვა</h3>
-        <select id="regType">
-            <option value="west">დასავლეთი</option>
-            <option value="east">აღმოსავლეთი</option>
-        </select>
-        <input type="text" id="regName" placeholder="სახელი გვარი">
-        <input type="text" id="regPhone" placeholder="ტელეფონი">
-        <button class="btn-gen" onclick="addItem('regional')">+ დამატება</button>
-        <div id="regListUI" style="margin-top:10px;"></div>
-    </div>
-
-    <div class="box">
-        <h3>📞 ქოლცენტრი / შენიშვნა</h3>
-        <input type="text" id="ccNum" value="8888" oninput="render()">
-        <textarea id="noteTxt" placeholder="შენიშვნა..." oninput="render()"></textarea>
-    </div>
+<html lang="ka"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ფილიალის ძიება</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#eef1f8;--card:#fff;--text:#18202f;--muted:#68728a;--accent:#3b5bdb;--accent2:#7048e8;--border:#e1e6f0;--hl:#fff1a8;--bad:#e03131;--badbg:#ffe3e3;--ok:#2b8a3e;--okbg:#e6f6ea;--shadow:0 2px 10px rgba(30,45,90,.07)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1219;--card:#1a1e2b;--text:#e8ebf4;--muted:#8e98b3;--accent:#748ffc;--accent2:#9775fa;--border:#2a3042;--hl:#5c4a0e;--bad:#ff8787;--badbg:#3d1d22;--ok:#69db7c;--okbg:#17301f;--shadow:none}}
+:root[data-theme="dark"]{--bg:#0f1219;--card:#1a1e2b;--text:#e8ebf4;--muted:#8e98b3;--accent:#748ffc;--accent2:#9775fa;--border:#2a3042;--hl:#5c4a0e;--bad:#ff8787;--badbg:#3d1d22;--ok:#69db7c;--okbg:#17301f;--shadow:none}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans Georgian","Segoe UI",sans-serif;line-height:1.45}
+header{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:28px 16px 74px}
+.in{max-width:760px;margin:0 auto}
+h1{font-size:1.6rem;margin:0 0 4px;letter-spacing:-.01em}
+.sub{margin:0;opacity:.85;font-size:.92rem}
+.main{max-width:760px;margin:-46px auto 0;padding:0 16px 48px}
+.sbox{position:relative}
+.sbox svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:22px;height:22px;color:var(--muted);pointer-events:none}
+input[type=search]{width:100%;font:inherit;font-size:1.25rem;color:var(--text);background:var(--card);border:2px solid transparent;border-radius:16px;padding:17px 18px 17px 52px;box-shadow:0 6px 24px rgba(20,30,70,.18)}
+input[type=search]:focus{outline:none;border-color:var(--accent)}
+.filters{display:flex;gap:8px;margin:14px 0 4px;flex-wrap:wrap;align-items:center}
+.seg{display:flex;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:3px}
+.seg button{font:inherit;font-size:.88rem;border:0;background:none;color:var(--muted);padding:6px 13px;border-radius:9px;cursor:pointer}
+.seg button.on{background:var(--accent);color:#fff}
+select{font:inherit;font-size:.88rem;color:var(--text);background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 10px;max-width:100%;flex:1;min-width:140px}
+.count{color:var(--muted);font-size:.85rem;margin:12px 4px 8px}
+.res{display:grid;gap:10px}
+.card{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
+.num{flex:0 0 62px;height:62px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.3rem;line-height:1.1}
+.num small{font-size:.6rem;font-weight:600;opacity:.9;letter-spacing:.02em;max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.body{flex:1;min-width:0}
+.obj{font-size:.93rem;color:var(--muted);word-break:break-word}
+.emp{font-size:1.1rem;font-weight:600;margin-top:2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag{font-size:.78rem;font-weight:600;border-radius:8px;padding:2px 10px}
+.tag.bad{background:var(--badbg);color:var(--bad)}
+.tag.ok{background:var(--okbg);color:var(--ok)}
+.card.closed{opacity:.8}
+.call{display:inline-flex;align-items:center;gap:8px;margin-top:10px;background:var(--ok);color:#fff;text-decoration:none;font-weight:600;font-size:.95rem;padding:9px 16px;border-radius:12px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:12px;font-size:.9rem;opacity:0;pointer-events:none;transition:.25s;max-width:90%;text-align:center}
+.toast.show{opacity:1}
+.call:active{transform:scale(.97)}
+.call small{opacity:.85;font-weight:500;font-size:.8rem}
+mark{background:var(--hl);color:inherit;border-radius:4px;padding:0 2px}
+.empty{text-align:center;color:var(--muted);padding:36px 0}
+.empty b{display:block;font-size:2rem}
+</style></head><body>
+<header><div class="in"><h1>ფილიალის ძიება</h1><p class="sub" id="sub"></p></div></header>
+<div class="main">
+ <div class="sbox">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+  <input type="search" id="q" placeholder="ფილიალის ნომერი, მაგ. 365" inputmode="search" autocomplete="off" autofocus>
+ </div>
+ <div class="filters">
+  <div class="seg" id="seg"><button data-s="all" class="on">ყველა</button><button data-s="open">მოქმედი</button><button data-s="closed">დახურული</button></div>
+  <select id="emp"><option value="">ყველა თანამშრომელი</option></select>
+ </div>
+ <div class="count" id="count"></div>
+ <div class="res" id="res"></div>
 </div>
-
-<div id="main">
-    <div id="canvas">
-        <div id="liveBanner" class="live-banner">
-            <div id="liveD" class="big-date">---</div>
-            <div id="liveN" class="live-name">- - -</div>
-            <a id="liveP" href="#" style="font-size:32px; color:var(--blue); font-weight:900; text-decoration:none; display:block; margin:10px 0;">---</a>
-            <div style="display:flex; gap:15px; justify-content:center; margin-top:10px;">
-                <a id="liveC" href="#" class="btn-m btn-call" style="width:120px; padding:12px;">📞 CALL</a>
-                <a id="liveV" href="#" class="btn-m btn-viber" style="width:120px; padding:12px;">💜 VIBER</a>
-            </div>
-        </div>
-
-        <div class="priority-box">
-            <div id="wBox" class="p-card"></div>
-            <div id="eBox" class="p-card"></div>
-            <div id="cBox" class="p-card" style="background:#334155;"></div>
-        </div>
-
-        <div id="noteBox" style="display:none; padding:20px; border-radius:25px; border-left:8px solid; margin-bottom:25px; background:#f1f5f9; font-weight:800; font-size:16px;"></div>
-        <div id="scheduleBody"></div>
-    </div>
-    <button class="btn-gen" style="background:var(--green); width:720px; margin-top:20px; padding:18px; font-size:18px;" onclick="exportFinal()">📋 საბოლოო HTML-ის კოპირება</button>
-</div>
-
+<div class="toast" id="toast"></div>
 <script>
-    let staff = [
-        { name: "გიორგი ლომიძე", phone: "555558222" },
-        { name: "ვასილ გოგალაძე", phone: "557949827" },
-        { name: "შალვა გაგნიძე", phone: "551770200" },
-        { name: "გიორგი ტარყაშვილი", phone: "577385250" },
-        { name: "გუგა ბალანჩივაძე", phone: "577978792" },
-        { name: "გიორგი ბოჭორიშვილი", phone: "591927831" },
-        { name: "ოთარ ჯავახიშვილი", phone: "577979526" },
-         { name: "ზაზა დემეტრაშვილი", phone: "591111887" },
-        { name: "ალიკა ყალიჩავა", phone: "551688899" }
-    ];
-
-    let west = [{name: "ზაალ გვეტაძე", phone: "568230917"}];
-    let east = [
-        {name: "თემო გელაშვილი", phone: "577698890"},
-        {name: "უჩა მჭედლიშვილი", phone: "599470033"}
-    ];
-    let schedule = [];
-    const months = ["იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი", "ივლისი", "აგვისტო", "სექტემბერი", "ოქტომბერი", "ნოემბერი", "დეკემბერი"];
-
-    window.onload = () => {
-        document.getElementById('workMonth').value = new Date().toISOString().slice(0, 7);
-        render();
-        updateUIStyles();
-    };
-
-    function updateUIStyles() {
-        const bg = document.getElementById('clrBg').value;
-        const regBg = document.getElementById('clrReg').value;
-        const brd = document.getElementById('clrBorder').value;
-        const txt = document.getElementById('clrText').value;
-        const nme = document.getElementById('clrName').value;
-
-        const banner = document.getElementById('liveBanner');
-        banner.style.background = bg;
-        banner.style.borderColor = brd;
-        
-        document.getElementById('wBox').style.background = regBg;
-        document.getElementById('eBox').style.background = regBg;
-
-        document.getElementById('liveD').style.color = txt;
-        document.getElementById('liveP').style.color = txt;
-        document.getElementById('liveN').style.color = nme;
-
-        const styleId = 'dynamic-pulse-style';
-        let styleTag = document.getElementById(styleId) || document.createElement('style');
-        styleTag.id = styleId;
-        styleTag.innerHTML = `@keyframes pulse-border { 
-            0% { transform: scale(1); box-shadow: 0 0 0 0 ${brd}b3; } 
-            50% { transform: scale(1.01); box-shadow: 0 0 25px 10px ${brd}66; } 
-            100% { transform: scale(1); box-shadow: 0 0 0 0 ${brd}00; } 
-        }`;
-        document.head.appendChild(styleTag);
-    }
-
-    function addItem(type) {
-        if(type === 'staff') {
-            const n = document.getElementById('stName').value, p = document.getElementById('stPhone').value;
-            if(n && p) { staff.push({name:n, phone:p}); document.getElementById('stName').value=''; document.getElementById('stPhone').value=''; }
-        } else if(type === 'regional') {
-            const n = document.getElementById('regName').value, p = document.getElementById('regPhone').value, r = document.getElementById('regType').value;
-            if(n && p) {
-                if(r === 'west') west.push({name:n, phone:p}); else east.push({name:n, phone:p});
-                document.getElementById('regName').value=''; document.getElementById('regPhone').value='';
-            }
-        }
-        render();
-    }
-
-    function generateSchedule() {
-        const mVal = document.getElementById('workMonth').value;
-        const s = parseInt(document.getElementById('rangeStart').value), e = parseInt(document.getElementById('rangeEnd').value);
-        if(!mVal || !staff.length) return;
-        schedule = [];
-        for(let d = s; d <= e; d++) {
-            schedule.push({ day: d, person: staff[(d-s) % staff.length] });
-        }
-        render();
-    }
-
-    function changeDuty(dayIdx, newName) {
-        schedule[dayIdx].person = staff.find(p => p.name === newName);
-        render();
-    }
-
-    function render() {
-        const counts = {};
-        schedule.forEach(item => {
-            counts[item.person.name] = (counts[item.person.name] || 0) + 1;
-        });
-        document.getElementById('statsList').innerHTML = Object.entries(counts)
-            .sort((a,b) => b[1] - a[1])
-            .map(([name, count]) => `<div class="s-item">${name} <span class="count-badge">${count}</span></div>`).join('');
-
-        document.getElementById('staffListUI').innerHTML = staff.map((s, i) => `<div class="s-item">${s.name} <span class="del" onclick="staff.splice(${i},1);render()">✕</span></div>`).join('');
-        document.getElementById('regListUI').innerHTML = 
-            west.map((s, i) => `<div class="s-item">დას: ${s.name} <span class="del" onclick="west.splice(${i},1);render()">✕</span></div>`).join('') +
-            east.map((s, i) => `<div class="s-item">აღმ: ${s.name} <span class="del" onclick="east.splice(${i},1);render()">✕</span></div>`).join('');
-
-        const getViberLink = (phone) => `viber://chat?number=%2B995${phone.replace(/\s+/g, '').slice(-9)}`;
-
-        const drawP = (list, title) => `<small style="text-transform:uppercase; font-size:9px; display:block; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:5px; font-weight:800;">${title}</small>` + 
-            list.map(p => `
-                <div class="p-info">
-                    <b>${p.name}</b><br>${p.phone}
-                    <div style="margin-top:8px; display:flex; gap:5px; justify-content:center;">
-                        <a href="tel:${p.phone}" class="btn-m btn-call">📞</a>
-                        <a href="${getViberLink(p.phone)}" class="btn-m btn-viber">💜</a>
-                    </div>
-                </div>`).join('');
-
-        document.getElementById('wBox').innerHTML = drawP(west, "დასავლეთი");
-        document.getElementById('eBox').innerHTML = drawP(east, "აღმოსავლეთი");
-        document.getElementById('cBox').innerHTML = `<small style="text-transform:uppercase; font-size:9px; font-weight:800;">📞 ქოლცენტრი</small><b style="font-size:24px; margin:15px 0; display:block;">${document.getElementById('ccNum').value}</b><small>09:00 - 18:00</small>`;
-
-        const nBox = document.getElementById('noteBox'), nTxt = document.getElementById('noteTxt').value;
-        nBox.style.display = nTxt ? 'block' : 'none'; nBox.innerText = nTxt; nBox.style.borderColor = document.getElementById('clrBorder').value;
-
-        const mVal = document.getElementById('workMonth').value;
-        if(!mVal || !schedule.length) return;
-        const year = parseInt(mVal.split('-')[0]), month = parseInt(mVal.split('-')[1])-1;
-        const today = new Date().getDate(), currM = new Date().getMonth();
-
-        document.getElementById('scheduleBody').innerHTML = schedule.map((item, idx) => {
-            const dateObj = new Date(year, month, item.day);
-            const isWeekend = (dateObj.getDay() === 0 || dateObj.getDay() === 6);
-            let isToday = (item.day === today && month === currM);
-            
-            if(isToday) {
-                document.getElementById('liveD').innerText = `${item.day} ${months[month]}`;
-                document.getElementById('liveN').innerText = item.person.name;
-                document.getElementById('liveP').innerText = item.person.phone;
-                document.getElementById('liveP').href = "tel:"+item.person.phone;
-                document.getElementById('liveC').href = "tel:"+item.person.phone;
-                document.getElementById('liveV').href = getViberLink(item.person.phone);
-            }
-
-            return `<div class="row ${isToday ? 'today-row' : ''} ${isWeekend ? 'weekend-row' : ''}" data-day="${item.day}">
-                <div>
-                    <b>${item.day} ${months[month]}</b>
-                    ${isWeekend ? '<span class="weekend-label">შაბათი-კვირა</span>' : ''}
-                </div>
-                <div style="text-align:right">
-                    <select class="edit-select" onchange="changeDuty(${idx}, this.value)">
-                        ${staff.map(s => `<option value="${s.name}" ${s.name === item.person.name ? 'selected' : ''}>${s.name}</option>`).join('')}
-                    </select>
-                    <div style="font-weight:900; color:#334155; font-size:14px; margin-bottom:5px;">${item.person.phone}</div>
-                    <div style="display:flex; gap:3px; justify-content:flex-end;">
-                        <a href="tel:${item.person.phone}" class="btn-m btn-call">📞 CALL</a>
-                        <a href="${getViberLink(item.person.phone)}" class="btn-m btn-viber">💜 VIBER</a>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-    }
-
-    function exportFinal() {
-        const canvas = document.getElementById('canvas').cloneNode(true);
-        const scheduleJSON = JSON.stringify(schedule);
-        const monthsJSON = JSON.stringify(months);
-        const monthVal = document.getElementById('workMonth').value;
-
-        canvas.querySelectorAll('.row').forEach(row => {
-            const select = row.querySelector('.edit-select');
-            if(select) {
-                const nameText = select.value;
-                select.outerHTML = `<b style="font-size:16px; display:block; color:#0f172a; margin-bottom:4px;">${nameText}</b>`;
-            }
-        });
-        
-        const brd = document.getElementById('clrBorder').value;
-        const regBg = document.getElementById('clrReg').value;
-        const bg = document.getElementById('clrBg').value;
-        const txtColor = document.getElementById('clrText').value;
-        const nameColor = document.getElementById('clrName').value;
-
-        const finalHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
-            body{font-family:system-ui, -apple-system, sans-serif; background:#f8fafc; display:flex; justify-content:center; padding:20px;}
-            #canvas{width:100%; max-width:720px; background:white; border-radius:45px; padding:35px; box-shadow:0 30px 60px rgba(0,0,0,0.1);}
-            .live-banner{background:${bg}; color:white; border-radius:35px; text-align:center; padding:35px; margin-bottom:25px; border:5px solid ${brd}; animation: p 3s infinite ease-in-out;}
-            @keyframes p { 0%{transform:scale(1); box-shadow:0 0 0 0 ${brd}b3;} 50%{transform:scale(1.01); box-shadow:0 0 20px 5px ${brd}66;} 100%{transform:scale(1);} }
-            .big-date{font-size:48px; font-weight:900; color:${txtColor}; margin-bottom:10px;}
-            .live-name{font-size:28px; font-weight:800; color:${nameColor};}
-            .priority-box{display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:20px;}
-            .p-card{background:${regBg}; padding:15px; border-radius:28px; color:white; text-align:center; min-height:180px;}
-            .p-info{background:rgba(255,255,255,0.1); padding:12px 5px; border-radius:18px; margin-bottom:8px;}
-            .row{padding:15px 20px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; transition: 0.3s;}
-            .today-row{background: #fef2f2 !important; border-left: 8px solid ${brd} !important; border-radius: 0 20px 20px 0;}
-            .weekend-row { background: #f1f5f9; }
-            .weekend-label { color: #ef4444; font-size: 10px; display: block; text-transform: uppercase; font-weight: 800; }
-            .btn-m{text-decoration:none; padding:8px 15px; border-radius:10px; font-weight:800; display:inline-block; margin:2px; background:#16a34a; color:white; font-size:10px;}
-            .btn-viber{background:#7360f2 !important;}
-            #noteBox{border-left:8px solid ${brd} !important;}
-        </style></head><body>
-        ${canvas.outerHTML}
-        <script>
-            const schedule = ${scheduleJSON};
-            const months = ${monthsJSON};
-            const targetMonthStr = "${monthVal}";
-
-            function updateLiveSync() {
-                const now = new Date();
-                const d = now.getDate();
-                const m = now.getMonth();
-                const y = now.getFullYear();
-                const [targetY, targetMStr] = targetMonthStr.split('-').map(Number);
-                const targetM = targetMStr - 1;
-
-                document.querySelectorAll('.row').forEach(r => {
-                    const rDay = parseInt(r.getAttribute('data-day'));
-                    r.classList.remove('today-row');
-                    
-                    if(y === targetY && m === targetM) {
-                        if(rDay < d) { 
-                            r.style.display = 'none'; 
-                        } else if(rDay === d) {
-                            r.classList.add('today-row');
-                        } else {
-                            r.style.display = 'flex';
-                        }
-                    }
-                });
-
-                const todayData = schedule.find(i => i.day === d && targetM === m && targetY === y);
-                if(todayData) {
-                    document.getElementById('liveD').innerText = todayData.day + " " + months[targetM];
-                    document.getElementById('liveN').innerText = todayData.person.name;
-                    document.getElementById('liveP').innerText = todayData.person.phone;
-                    document.getElementById('liveP').href = "tel:" + todayData.person.phone;
-                    document.getElementById('liveC').href = "tel:" + todayData.person.phone;
-                    document.getElementById('liveV').href = "viber://chat?number=%2B995" + todayData.person.phone.replace(/\\s+/g, '').slice(-9);
-                } else {
-                    document.getElementById('liveD').innerText = "დღეს დასვენებაა";
-                    document.getElementById('liveN').innerText = "- - -";
-                    document.getElementById('liveP').innerText = "";
-                }
-            }
-            updateLiveSync();
-            setInterval(updateLiveSync, 60000);
-        <\/script>
-        </body></html>`;
-        
-        const el = document.createElement('textarea'); el.value = finalHTML; document.body.appendChild(el); el.select();
-        document.execCommand('copy'); document.body.removeChild(el);
-        alert("✅ კოდი დაკოპირებულია! შაბათ-კვირა მონიშნულია.");
-    }
-</script>
-</body>
-</html>
+const DATA=[["დაიხურა","დეპო 1 (სანაპირო)"],["ზაზა დემეტრაშვილი","დეპო 2 (მეტრო ვარკეთილი, ჯავახეთის 44)"],["ვასო გოგალაძე","დეპო 3 (გლდანი, ბინგო)"],["ზაზა დემეტრაშვილი","დეპო 4 (წულუკიძის ქ. 11)"],["ალიკა ყალიჩავა","დეპო 5 (ვ.ფშაველას 6)"],["ალექსანდრე ტუხაშვილი","დეპო 7 (თ. მეფის გამზ., სადგური)"],["გიორგი ტარყაშვილი","დეპო 10 (არამიანცი)"],["ვასო გოგალაძე","დეპო 11 (გლდანი 1 მ.რ.)"],["გუგა ბალანჩივაძე","დეპო 12 (ვაკე, აბაშიძის ქ)"],["ალექსანდრე ტუხაშვილი","დეპო 14 (დიღმის მასივი, 5 კვ.)"],["გიორგი აბრამიძე","დეპო 16 (გორი, სტალინის გამზ.)"],["გიორგი ბოჭორიშვილი","დეპო 19 (ვ.ფშაველას 65)"],["გიორგი ლომიძე","დეპო 20 (სანზონა, გურამიშვილის 36)"],["გუგა ბალანჩივაძე","დეპო 24 (ფალიაშვილის 33, პიქსელთან)"],["გიორგი ლომიძე","დეპო 25 (ნახალოვკა, დადიანის 144)"],["გიორგი აბრამიძე","დეპო 27 (გორი, იურუშალაიმის 9)"],["გიორგი ლომიძე","დეპო 28 (თოდუას ცენტრი)"],["ალექსანდრე ტუხაშვილი","დეპო 29 (წერეთლის 110)"],["ვასო გოგალაძე","დეპო 32 (თემქა, 3 მ.რ.)"],["გიორგი ლომიძე","დეპო 34 (საბჭოს მოედანი, აბაშიძის 9)"],["გიორგი ტარყაშვილი","დეპო 36 (ისანი)"],["გიორგი ბოჭორიშვილი","დეპო 37 (ქავთარაძის 1, გუდვილი)"],["ვასო გოგალაძე","დეპო 39 (გლდანი, 1 მ.რ., კარტოგრაფია)"],["დაიხურა","დეპო 40 (გადასასვლელი ხიდი)"],["გიორგი ტარყაშვილი","დეპო 41 (ნავთლუღი, მოსკოვის გამზ. 1)"],["ალიკა ყალიჩავა","დეპო 44 (ბახტრიონი)"],["ვასო გოგალაძე","დეპო 46 (გლდანი ტიულენევის 11)"],["გუგა ბალანჩივაძე","დეპო 48 (ფალიაშვილის 85)"],["ალექსანდრე ტუხაშვილი","დეპო 51 (მარჯანიშვილის 26)"],["შალვა გაგნიძე","დეპო 52 (დიღომი, ჭიაურელის 11)"],["შალვა გაგნიძე","დეპო 55 (დიღომი, ლუბლიანას 5, ჰოსპ.)"],["გიორგი ლომიძე","დეპო 56 (დადიანის 323)"],["ვასო გოგალაძე","დეპო 58 (მუხიანი ფრესკო, გობრონიძის 18)"],["ზაზა დემეტრაშვილი","დეპო 59 (ვარკეთილი ფრესკო, კალოუბნის 9)"],["გიორგი ტარყაშვილი","დეპო 62 (ავლაბარი, მესხიშვილის 12)"],["ზაზა დემეტრაშვილი","დეპო 67 (სამგორი, კახეთის გზატკ. 36)"],["გიორგი ბოჭორიშვილი","დეპო 70 (ყაზბეგის გამზ. 24)"],["ვასო გოგალაძე","დეპო 71 (მუხიანი, დუმბაძის ქ)"],["ზაზა დემეტრაშვილი","დეპო 72 (ვარკეთილი 3, 4 მ.რ.)"],["შალვა გაგნიძე","დეპო 73 (დიდი დიღომი, პეტრიწის 11)"],["გიორგი ტარყაშვილი","დეპო 74 (ორთაჭალა, გორგასლის 39)"],["გიორგი ტარყაშვილი","დეპო 75 (ორთაჭალა ფრესკო, გორგასლის 61)"],["ალიკა ყალიჩავა","დეპო 79 (დოლიძის 11)"],["დაიხურა","დეპო 80 (რუსთაველის გამზ, სმარტი)"],["დაიხურა","დეპო 84 (გორი, სოფ. ტინისხიდი, სმარტი)"],["გუგა ბალანჩივაძე","დეპო 85 (ლეონიძის ქ. 4)"],["ზაზა დემეტრაშვილი","დეპო 86 (აფრიკა, ჭიჭინაძის 17)"],["გუგა ბალანჩივაძე","დეპო 89 (მელიქიშვილის გამზ. 6)"],["გიორგი ლომიძე","დეპო 90 (სარაჯიშვილი)"],["გიორგი ტარყაშვილი","დეპო 91 (მოსკოვის გამზ, პოლიკ. #19)"],["გიორგი ბოჭორიშვილი","დეპო 92 (საბურთალო, ს. ეულის ქ. ფრესკო)"],["გიორგი ტარყაშვილი","დეპო 93 (ლაღიძის ქ. 8)"],["გიორგი აბრამიძე","დეპო 95 (გორი, ცხინვალის გზატკ.)"],["დაიხურა","დეპო 97 (ერისთავის 3)"],["ალიკა ყალიჩავა","დეპო 99 (საბურთალო, ცინცაძის 37, კარფური)"],["დაიხურა","დეპო 100 (ჩაფიძის კლინიკა)"],["გიორგი ლომიძე","დეპო 101 (ჩიქობავას ქ., ფრესკო)"],["გიორგი ლომიძე","დეპო 102 (თემქა, 9 კვ.)"],["გიორგი ლომიძე","დეპო 104 (თოდუას კლინიკა)"],["ალექსანდრე ტუხაშვილი","დეპო 106 (აღმაშენებლის 97)"],["დაიხურა","დეპო 107 (ონკო ცენტრი)"],["გიორგი ბოჭორიშვილი","დეპო 110 (ვ.ფშაველა, მედისონი)"],["დაიხურა","დეპო 111 (აეროპორტი)"],["გიორგი ტარყაშვილი","დეპო 124 (ისანი, ბერი გაბრიელ სალოსის 42 ფრესკო)"],["ვასო გოგალაძე","დეპო 125 (გლდანი, კარფური)"],["გიორგი ტარყაშვილი","დეპო 130 (ათონელი)"],["გიორგი აბრამიძე","დეპო 132 (კასპი გ.სააკაძის 5ბ)"],["გიორგი ბოჭორიშვილი","დეპო 134 (ნუცუბიძის 183)"],["დაიხურა","დეპო 135 (საგარეჯო, სტალინის 65)"],["გიორგი ლომიძე","დეპო 136 (თბილისი, გუდამაყრი꣏)"],["გიორგი ლომიძე","დეპო 138 (ც.დადიანის 34)"],["დაიხურა","დეპო 139 (აღმაშენებლის გამზ. 5, ვორონცოვის მ)"],["ზაზა დემეტრაშვილი","დეპო 141 (ლილო, კვ.2, კორ.8 მიმდ.)"],["გიორგი ტარყაშვილი","დეპო 143 (ქეთევან დედოფლის 91)"],["ალექსანდრე ტუხაშვილი","დეპო 146 (რობაქიძის გამზ 1ა)"],["გუგა ბალანჩივაძე","დეპო 147 (ფალიაშვილის 59)"],["ალიკა ყალიჩავა","დეპო 149 (ვ.ფშაველას 25)"],["დაიხურა","დეპო 150 (მორკინალი)"],["ზაზა დემეტრაშვილი","დეპო 151 (ევექსი ვარკეთილი)"],["ვასო გოგალაძე","დეპო 152 (ევექსი გლდანი)"],["გიორგი ტარყაშვილი","დეპო 153 (ევექსი ისანი)"],["ალექსანდრე ტუხაშვილი","დეპო 154 (ევექსი დიდუბე)"],["დაიხურა","დეპო 157 (გლდანი, ილია ვეკუას ქ 27)"],["გიორგი ლომიძე","დეპო 158 (მცხეთა, სამხედროს ქ)"],["გიორგი ტარყაშვილი","დეპო 160 (ბოგდან ხმელნიცკი)"],["გიორგი ტარყაშვილი","დეპო 161 (მოსკოვის გამზ.)"],["შალვა გაგნიძე","დეპო 165 (ვაშლიჯვარი)"],["ზაზა დემეტრაშვილი","დეპო 166 (ვაზისუბანი 4 მ/რ)"],["კობა კოჩალიძე","დეპო 167 (ფონიჭალა)"],["შალვა გაგნიძე","დეპო 168 (ევექსი, დიდი დიღომი)"],["ალიკა ყალიჩავა","დეპო 169 (პეკინი)"],["დაიხურა","დეპო 171 (გორი, გურამიშვილის 84)"],["გიორგი ლომიძე","დეპო 173 (გურამიშვილის გამზ. #64 ფრესკო)"],["გუგა ბალანჩივაძე","დეპო 175 (ჭავჭავაძის გამზ. #41)"],["დაიხურა","დეპო 178 (ჭავჭავაძის 54)"],["გიორგი ბოჭორიშვილი","დეპო 179 (ვაჟა ფშაველას 40 ევექსი)"],["ვასო გოგალაძე","დეპო 181 (თემქა, რჩეულიშვილის 14)"],["ალექსანდრე ტუხაშვილი","დეპო 182 (იაშვილი )"],["გიორგი ბოჭორიშვილი","დეპო 183 (ჯიქია, პოლიტკოვსკაიას 5ბ)"],["გიორგი ლომიძე","დეპო 186 (ავჭალა)"],["შალვა გაგნიძე","დეპო 187 (მირიან მეფის 55)"],["გუგა ბალანჩივაძე","დეპო 190 (ბაგები, წყნეთის გზატკეცილი 23ა)"],["გიორგი ლომიძე","დეპო 191 (თემქა საავადმყოფო)"],["შალვა გაგნიძე","დეპო 192 (ღუდუშაური)"],["ზაზა დემეტრაშვილი","დეპო 195 (ლილო მოლი)"],["დაიხურა","დეპო 198 (სადგურის მოედანი, თევდორე მღვდლის 5ა)"],["დაიხურა","დეპო 202 (კახეთის გზატკეცილი, სმარტი)"],["გიორგი აბრამიძე","დეპო 206 (ქარელი, ი.ჭავჭავაძის 10ა)"],["გიორგი აბრამიძე","დეპო 207 (გორი, მშვიდობის 13)"],["დაიხურა","დეპო 208 (ქავთარაძის 23 ევექსი)"],["დაიხურა","დეპო 209 (ჟვანიას მოედანი)"],["შალვა გაგნიძე","დეპო 211 (არჩილ მეფის 10)"],["დაიხურა","დეპო 212 (რამაზ ჩხიკვაძის 1)"],["ზაზა დემეტრაშვილი","დეპო 217 (ვარკეთილი, სუხიშვილის 12)"],["ალიკა ყალიჩავა","მეზოთერაპიის კაბინეტი&N2048 კლინიკა"],["დაიხურა","წითელი A 10 (ვარკეთილი)"],["დაიხურა","წითელი A 11(მეტრომშენი)"],["დაიხურა","წითელი A 19 (გლდანის ხევი)"],["დაიხურა","წითელი A 20 შანხაი (ოთარ ჩხეიძის 10)"],["დაიხურა","წითელი A 21 (ლუბლიანას 3/16)"],["დაიხურა","წითელი A 4 (ორხევი)"],["დაიხურა","წითელი A 9 (ვაკე)"],["გიორგი ტარყაშვილი","ჯიპისი 2 (ავლაბარი)"],["ალექსანდრე ტუხაშვილი","ჯიპისი 4 (დიღომი)"],["დაიხურა","ჯიპისი 6 (გლდანი)"],["დაიხურა","ჯიპისი 8 (ნავთლუღი)"],["დაიხურა","ჯიპისი 10 (სოლოლაკი)"],["გუგა ბალანჩივაძე","ჯიპისი 11 (ვაკე)"],["ალიკა ყალიჩავა","ჯიპისი 13 (ყაზბეგი)"],["დაიხურა","ჯიპისი 14 (დადიანი)"],["გიორგი ბოჭორიშვილი","ჯიპისი 15 (ვაჟა-ფშაველა)"],["ალექსანდრე ტუხაშვილი","ჯიპისი 19 (წერეთელი)"],["ალიკა ყალიჩავა","ჯიპისი 20 (დოლიძე)"],["ალიკა ყალიჩავა","ჯიპისი 21 (სამედიცინო)"],["დაიხურა","ჯიპისი 22 (გორი-ჭავჭავაძე)"],["გუგა ბალანჩივაძე","ჯიპისი 26 (რუსთაველი)"],["დაიხურა","ჯიპისი 28 (გამოფენა)"],["ალექსანდრე ტუხაშვილი","ჯიპისი 32 (ზაარბრუკენი)"],["გუგა ბალანჩივაძე","ჯიპისი 34 (ყიფშიძე)"],["გუგა ბალანჩივაძე","ჯიპისი 35 (წყნეთი)"],["გიორგი ტარყაშვილი","ჯიპისი 42 (პუშკინი)"],["ალიკა ყალიჩავა","ჯიპისი 47 (მიცკევიჩი)"],["ალიკა ყალიჩავა","ჯიპისი 48 (გამსახურდია 23/25)"],["ზაზა დემეტრაშვილი","ჯიპისი 49 (ვაზისუბანი)"],["დაიხურა","ჯიპისი 52 (ჭავჭავაძე 24)"],["დაიხურა","ჯიპისი 54 (ვაჟა-ფშაველა 75)"],["გიორგი ტარყაშვილი","ჯიპისი 57 (გორგასალი)"],["დაიხურა","ჯიპისი 58 (გურამიშვილი)"],["დაიხურა","ჯიპისი 60 (კოსტავას 23)"],["ზაზა დემეტრაშვილი","ჯიპისი 87 (ვარკეთილი)"],["დაიხურა","ჯიპისი 90 (ისანი)"],["დაიხურა","ჯიპისი 93 (ლუბლიანა 5)"],["გიორგი ბოჭორიშვილი","ჯიპისი 94 (დელისი)"],["გიორგი ლომიძე","ჯიპისი 96 (ნაძალადევი)"],["ვასო გოგალაძე","ჯიპისი 515 (გლდანი 2)"],["შალვა გაგნიძე","ჯიპისი 520 (დიდი დიღომი)"],["დაიხურა","ჯიპისი 521 (ღრმაღელე)"],["გიორგი ტარყაშვილი","ჯიპისი 522 (მოსკოვის გამზ.2)"],["დაიხურა","ჯიპისი 523 (თბილისი მოლი)"],["დაიხურა","ჯიპისი 525 (ვარკეთილი 2)"],["დაიხურა","ჯიპისი 527 (მარჯანიშვილი 31)"],["გუგა ბალანჩივაძე","ჯიპისი 530 (კეკელიძე)"],["დაიხურა","ჯიპისი 535 (აბაშიძის 41)"],["გიორგი აბრამიძე","ჯიპისი 536 (გორი 4)"],["ალიკა ყალიჩავა","ჯიპისი 537 (დოლიძის 11)"],["ალიკა ყალიჩავა","ჯიპისი 540 (პეკინი 11)"],["ალიკა ყალიჩავა","ჯიპისი 541 (მიცკევიჩი 8)"],["გუგა ბალანჩივაძე","ჯიპისი 542 (მელიქიშვილი)"],["დაიხურა","ჯიპისი 543 (გლდანი 4)"],["დაიხურა","ჯიპისი 544 (დადიანი 2)"],["გიორგი ლომიძე","ჯიპისი 545 (თემქა)"],["გიორგი ტარყაშვილი","ჯიპისი 548 (ისანი-მოლი)"],["ზაზა დემეტრაშვილი","ჯიპისი 549 (ისთფოინთი)"],["ალიკა ყალიჩავა","ჯიპისი 553 (ცინცაძის 12)"],["ალექსანდრე ტუხაშვილი","ჯიპისი 555 (წერეთლის 11)"],["ვასო გოგალაძე","ჯიპისი 556 (დუმბაძე)"],["დაიხურა","ჯიპისი 558 (კარაპს მედლაინი)"],["დაიხურა","ჯიპისი 567 (გლდანი მოლი)"],["დაიხურა","ჯიპისი 570 (ტრავმატოლოგიური)"],["დაიხურა","ჯიპისი 573 (დიდი დიღომი 3)"],["დაიხურა","ჯიპისი 576 (ვარკეთილꡳ)"],["დაიხურა","ჯიპისი 577 (რობაქიძე)"],["გიორგი ბოჭორიშვილი","ჯიპისი 580 (ვაჟა ფშაველას 41)"],["გუგა ბალანჩივაძე","ჯიპისი 582 (კარფური-ვაკე)"],["შალვა გაგნიძე","ჯიპისი 583 (გუდვილი-დიღომი)"],["ვასო გოგალაძე","ჯიპისი 585 (გლდანი-ლესელიძე)"],["ალექსანდრე ტუხაშვილი","ჯიპისი 586 (რობაქიძის გამზ)"],["დაიხურა","ჯიპისი 587 (მორკინალი)"],["გიორგი აბრამიძე","ჯიპისი 589 (გორი,გურამიშვილი)"],["დაიხურა","ჯიპისი 591 (პეტრე იბერი)"],["გიორგი ბოჭორიშვილი","ჯიპისი 592 (უნივერსიტეტი)"],["ალიკა ყალიჩავა","ჯიპისი 594 (აგროჰაბი)"],["დაიხურა","ჯიპისი 595 (შარტავა)"],["ალექსანდრე ტუხაშვილი","ჯიპისი 600 (აღმაშენებლის 118)"],["დაიხურა","ჯიპისი 601 (კანდელაკის 9)"],["გიორგი ბოჭორიშვილი","ჯიპისი 602 (სითიმოლი საბურთალო)"],["ალიკა ყალიჩავა","ჯიპისი 603 (კარტოზია)"],["გიორგი ბოჭორიშვილი","N2015 კლინიკა"],["გუგა ბალანჩივაძე","TBS 1 (რუსთაველი)"],["ზაზა დემეტრაშვილი","TBS 2 (ისთფოინტი)"],["გიორგი ლომიძე","დეპო 219 (თემქა, მე-9მ/რ ანაპის 414-ე დივიზიის ქ.34-ის მიმდ.)"],["გიორგი ტარყაშვილი","დეპო 220 (ბოკერია, ქინძმარაულის I შესახვევი)"],["გიორგი ლომიძე","დეპო 222 (ლოტკინი, ჩიტაიას 39ა)"],["გიორგი აბრამიძე","ჯიპისი 76 (ხაშური)"],["გიორგი აბრამიძე","ჯიპისი 78 (ახალციხე)"],["გიორგი აბრამიძე","დეპო 26 (ახალციხე)"],["გიორგი აბრამიძე","დეპო 50 (ხაშური, რუსთაველის 38)"],["გიორგი აბრამიძე","დეპო 148 (ბორჯომი, მესხეთის 5)"],["გიორგი აბრამიძე","დეპო 155 (ბაკურიანი)"],["გიორგი აბრამიძე","დეპო 194 (ხაშური, რუსთაველის 35)"],["გიორგი აბრამიძე","დეპო 176 (ნინოწმინდა)"],["გიორგი აბრამიძე","წითელი A 2 (ახალქალაქი)"],["ვასო გოგალაძე","ჯიპისი 41 (თელავი)"],["დაიხურა","ჯიპისი 562 (თელავი საავადმყოფო)"],["ვასო გოგალაძე","დეპო 21 (თელავი, ალაზნის 43)"],["ვასო გოგალაძე","დეპო 140 (ყვარელი)[PHD-L-E]"],["ვასო გოგალაძე","დეპო 142 (ლაგოდეხი, ჩოლოყაშვილის 1)"],["ვასო გოგალაძე","დეპო 174 (ახმეტა)"],["შალვა გაგნიძე","დეპო 57 (გურჯაანი, ნონეშვილი)"],["შალვა გაგნიძე","დეპო 78 (წნორი)"],["შალვა გაგნიძე","დეპო 213 (გურჯაანი, წ.ნინოს/თავისუფლების ქუჩა)"],["დაიხურა","წითელი A 22 (ლაგოდეხი )"],["კობა კოჩალიძე","ჯიპისი 12 (რუსთავი)"],["კობა კოჩალიძე","დეპო 18 (რუსთავი, შარტავა)"],["კობა კოჩალიძე","დეპო 77 (რუსთავი, ლეონიძე)"],["კობა კოჩალიძე","დეპო 83 (რუსთავი, მეგობრობის გამზ)"],["კობა კოჩალიძე","დეპო 129 (გარდაბანი)"],["დაიხურა","ჯიპისი 588 (რუსთავი, მესხიშვილი)"],["კობა კოჩალიძე","ჯიპისი 593 (რუსთავი მეგობრ.)"],["კობა კოჩალიძე","დეპო 188 (რუსთავი, მაგნიტი)"],["გიორგი ტარყაშვილი","წითელი A 3 (ორხევი)"],["დაიხურა","წითელი A 8 (რუსთავი)"],["კობა კოჩალიძე","წითელი A 1 (მარნეული)"],["კობა კოჩალიძე","დეპო 43 (მარნეული)"],["დაიხურა","დეპო 112 (ბოლნისი, აი-სი)"],["კობა კოჩალიძე","დეპო 145 (ბოლნისი, ორბელიანის 101ა)"],["კობა კოჩალიძე","დეპო 204 (მარნეული სპარი 26 მაისის ქ)"],["დაიხურა","წითელი A 23 (მარნეული მოლი)"],["ალექსანდრე ტუხაშვილი","დეპო 164 (აღმაშენებლის 96)"],["ალექსანდრე ტუხაშვილი","დეპო 223 (დიღმის მასივი ევგენი მიქელაძის 7ა)"],["ალიკა ყალიჩავა","ჯიპისი 606 (ლისი ვერანდა)"],["ალიკა ყალიჩავა","ჯიპისი 607 (ამაშუკელი )"],["შალვა გაგნიძე","დეპო 224 (გურჯაანი, ნონეშვილის 24)"],["დაიხურა","წითელი A 7 (გლდანის 2 მკ-რ კორპ 37)"],["გიორგი ბოჭორიშვილი","დეპო 225 (ნუცუბიძე რამაზ ჩხიკვაძის 39)"],["გიორგი ტარყაშვილი","დეპო 226 (წინანდლის 8/18)"],["შალვა გაგნიძე","დეპო 227 (დიდი დიღომი, პეტრე იბერი)"],["დაიხურა","ჯიპისი 608 (ამაღლება)"],["შალვა გაგნიძე","ჯიპისი 609 (მეფე მირიან)"],["დაიხურა","წითელი A 28 (რუსთავი, მესხიშვილის 11)"],["დაიხურა","წითელი A 30 (გარდაბანი, აღმაშენებლის 5)"],["დაიხურა","წითელი A 31 (თბილისი, ქავთარაძის 44)"],["კობა კოჩალიძე","წითელი A 35 (თბილისი, აეროპორტის დას 44)"],["დაიხურა","TBS 3 (ჭავჭავაძე)"],["გიორგი ბოჭორიშვილი","ჯიპისი 610 (ნუცუბიძე)"],["ზაზა დემეტრაშვილი","დეპო 228 (ვასიზუბნის 3/4 მრ ჰუალინგი)"],["დაიხურა","წითელი A 36 (თიანეთი, რუსთაველის 6)"],["დაიხურა","წითელი A 37 (დუშეთი, სტალინის 64)"],["დაიხურა","წითელი A 38 (თელავი, ჭავჭავაძის 52)"],["ალიკა ყალიჩავა","დეპო 229 (ტაშკენტის ქ.27 მედიქლაბი)"],["გიორგი ბოჭორიშვილი","დეპო 230 (ვაჟა-ფშაველას 39, დელისი)"],["კობა კოჩალიძე","დეპო 231 (სართიჭალა)"],["გიორგი აბრამიძე","დეპო 232 (ახალქალაქი, რუსთაველის 21/1)"],["დაიხურა","წითელი A44 ( თბილისი, გლდანის მე-3 მ/რ, კორპ.8)"],["დაიხურა","წითელი A45 (თბილისი, თემქის მე-3მ/რ, კვ 1, კორპ 18ა)"],["დაიხურა","წითელი A47 (წალკა, კოსტავას 34)"],["ალიკა ყალიჩავა","დეპო 234 (ალექსიძის 1 კორპ.2 სპორტის სასახლე)"],["ვასო გოგალაძე","დეპო 235 (თელავი, ი.ჭავჭავაძის ქ)"],["გიორგი ტარყაშვილი","დეპო 236 (ბერი გაბრიელ სალოსი)"],["გიორგი აბრამიძე","დეპო 237 (გორი, დიმიტრი ამილახვარის 32)"],["დაიხურა","წითელი A 51 (ფონიჭალა, რუსთავის გზატკეცილი)"],["დაიხურა","წითელი A 53 (თბილისი, მუხიანის 2 მკრ, კორპს.22 )"],["ვასო გოგალაძე","ჯიპისი 611 (გლდანი, ომარ ხიზანიშვილის 9)"],["დაიხურა","წითელი A 54 (თბილისი, ავთო ვარაზის ქ. N55)"],["ალექსანდრე ტუხაშვილი","დეპო 238 (რაფიელ აგლაძის ქუჩა 79)"],["ალექსანდრე ტუხაშვილი","დეპო 239 (კარაპს მედლაინი)"],["გიორგი აბრამიძე","დეპო 240 (სოფელი ნიქოზი)"],["დაიხურა","დეპო 241 (ვ. ნონეიშვილის ქუჩა 23)"],["დაიხურა","დეპო 242 (უნივერსიტეტის ქუჩა 17ა)"],["ალექსანდრე ტუხაშვილი","დეპო 243 (ლუბლიანას ქუჩა 11)"],["გიორგი ლომიძე","დეპო 245 (დაბა ყაზბეგი)"],["გიორგი ბოჭორიშვილი","TBS 4 (სითი მოლი)"],["გუგა ბალანჩივაძე","ჯიპისი 101 (ჭავჭავაძე)"],["გიორგი ლომიძე","ჯიპისი 612 (ცოტნე დადიანის 156)"],["გიორგი აბრამიძე","დეპო 246 (ხაშური, ბორჯომის ქუჩა 191)"],["ალექსანდრე ტუხაშვილი","დეპო 247 (ბაგრატიონის ქ, ფრესკო)"],["ვასო გოგალაძე","დეპო 248 (თელავი, სეხნიაშვილის ქ, ევექსი)"],["დაიხურა","წითელი A 57 (კონსტანტინე კაპანელის 8(ნუცუბიძე))"],["დაიხურა","წითელი A 58 (წალკა, არისტოტელეს 9)"],["დაიხურა","წითელი A 59 (თბილისი, ავჭალა, ლიბანის 19)"],["დაიხურა","წითელი A 60 (დმანისი, 9 აპრილის 27)"],["დაიხურა","წითელი A 62 (დაბა სტეფანწმინდა, ალექსანდრე ყაზბეგის 11)"],["გიორგი აბრამიძე","წითელია A 65 (ქარელი, სტალინის 49)"],["გიორგი აბრამიძე","წითელი A 67 (გორი, გორიჯვრის 56)"],["კობა კოჩალიძე","დეპო249(გორგასალის 93, პინეო)"],["დაიხურა","დეპო250(წყნეთი, შოთა რუსთაველის 45)"],["გიორგი ლომიძე","დეპო251(საგურამო, ბლოკი 084)"],["კობა კოჩალიძე","დეპო252(რუსთავი, მეგობრობის 18)"],["კობა კოჩალიძე","დეპო255(რუსთავი, დავით აღმაშენებლის გამზ. 89, მადაგონი)"],["გუგა ბალანჩივაძე","დეპო256(ჭავჭავაძის გამზ. 24)"],["გიორგი ლომიძე","დეპო257(ცოტნე დადიანის II მ/რ, კორპ. 3)"],["შალვა გაგნიძე","დეპო258(სოფელი დიღომი)"],["გიორგი ბოჭორიშვილი","დეპო259(ვაჟა-ფშაველას გამზ, მე-4 კვარტალი)"],["კობა კოჩალიძე","დეპო260(საგარეჯო,დავით აღმაშენებლის 17)"],["გიორგი ბოჭორიშვილი","ოპტიკა 1(თბილისი, სითი მოლი) - მაღაზია"],["დაიხურა","ჯიპისი615(წერეთლის 87)"],["გუგა ბალანჩივაძე","ჯიპისი616(ვაკის აუზი)"],["დაიხურა","ჯიპისი617(თბილისი, ონიაშვილის 2, გაგარინი)"],["ალექსანდრე ტუხაშვილი","დეპო261(გრიგოლ რობაქიძის 7)"],["დაიხურა","წითელი A 68 დმანისი, 9 აპრილის 67"],["დაიხურა","წითელი A 69 (ბორჯომი, რუსთაველის 67)"],["დაიხურა","ჯიპისი619(გალერია თბილისის კიოსკი)"],["გიორგი აბრამიძე","N2050 კლინიკა გორი"],["შალვა გაგნიძე","დეპო262(სოფელი დიღომი, 13 ასურელი)"],["გიორგი აბრამიძე","დეპო263(ახალციხე, რუსთაველის 93გ)"],["დაიხურა","წითელი A 73 გორი, თამარ მეფის მე-5კვ. კორპ. 26"],["გიორგი ლომიძე","წითელი A 74 მცხეთა, სოფელი წილკანი"],["დაიხურა","წითელი A 75 თბილისი, მუხიანი მე-2 მ/რ. კორპ. 5"],["დაიხურა","წითელი A 76 მცხეთა, ნატახტარი, ს/კ 72.03.24.330"],["დაიხურა","დეპო265(ჭავჭავაძის 74/76, მულტი)"],["გუგა ბალანჩივაძე","ჯიპისი104(აბაშიძე)"],["გუგა ბალანჩივაძე","დეპო266(გოგებაშვილის 50-50ა)"],["შალვა გაგნიძე","დეპო268(დედოფლისწყარო, ჰერეთის ქუჩა)"],["ზაზა დემეტრაშვილი","დეპო269(შუამთის 9)"],["შალვა გაგნიძე","დეპო270(აღმაშენებლის ხეივანი, ნიკორა)"],["ვასო გოგალაძე","დეპო271(ბოჭორიშვილის 7, ხიზაბავრი)"],["გიორგი ლომიძე","დეპო272(თიანეთი)"],["გუგა ბალანჩივაძე","დეპო274(შინდისი)"],["ზაზა დემეტრაშვილი","ჯიპისი620(თბილისის აეროპორტი)"],["დაიხურა","ჯიპისი621(საგურამო)"],["დაიხურა","წითელი A 79 (დუშეთის რაიონი, დაბა ჟინვალი)"],["დაიხურა","წითელი A 80 (წალკა, სოფ. ავრანლო)"],["დაიხურა","წითელი A 81 თბილისი, ალექსანდრე ყაზბეგის გამზირი 14"],["დაიხურა","ჯიპისი622(გუდაური)"],["გუგა ბალანჩივაძე","ჯიპისი623(გალერეა თბილისი)"],["დაიხურა","წითელი A 82 თბილისი, ომარ ხიზანიშვილის 17"],["დაიხურა","წითელი A 83 თბილისი, აღმაშენებლის 96"],["დაიხურა","წითელი A 84 თბილისი, პეკინის 17"],["დაიხურა","წითელი A 85 თბილისი, რუსთაველის გამზ 26"],["დაიხურა","წითელი A 86 თბილისი, მიხეილ იპოლიტოვივანოვის 9, ბლოკი გ, კომერციული ფართი 2ა"],["შალვა გაგნიძე","ჯიპისი103(თბილისი მოლი)"],["ალექსანდრე ტუხაშვილი","დეპო276(თბილისი ცენტრალი)"],["ზაზა დემეტრაშვილი","დეპო277(კალოუბნის 1)"],["კობა კოჩალიძე","დეპო279(რუსთავი, შარტავას 17, ტაშკენტი)"],["ვასო გოგალაძე","დეპო280(თბილისი, გლდანის მე5 მკ.რ.)"],["ალიკა ყალიჩავა","დეპო281(თბილისი, ნუცუბიძის მე4 მკ.რ)"],["გიორგი ლომიძე","დეპო282(ღრმაღელე)"],["ზაზა დემეტრაშვილი","დეპო283(ევექსი ვაზისუბანი)"],["გიორგი ლომიძე","დეპო284(დუშეთი)"],["დაიხურა","წითელი A 88 თბილისი, ი. ჭავჭავაძის გამზირი 25"],["დაიხურა","წითელი A 89 თბილისი, ი. აბაშიძის 72"],["დაიხურა","წითელი A 90 თბილისი, ვარკეთილის მე-3 მასივი, მე-6 კვარტალი, კორპ. 5ბ."],["გიორგი ლომიძე","დეპო286(გურამიშვილი)"],["შალვა გაგნიძე","დეპო287(ლუბლიანა, რკინიგზის საავადმყოფო)"],["დაიხურა","დეპო288(დიდი დიღომი, მულტი)"],["ალექსანდრე ტუხაშვილი","დეპო289(მარჯანიშვილი 31)"],["შალვა გაგნიძე","დეპო290(ციციშვილი, საავადმყოფო)"],["ვასო გოგალაძე","დეპო291(გლდანი, ა მ/რ)"],["ვასო გოგალაძე","დეპო293(ვეკუას ქ.#35)"],["ზაზა დემეტრაშვილი","დეპო294(ვარკეთილი3)"],["დაიხურა","წითელიA 94 (თბილისი, აკაკი წერეთლის გამზირი 95)"],["გუგა ბალანჩივაძე","ჯიპისი105(აქსისი ჭავჭავაძე)"],["გუგა ბალანჩივაძე","დეპო296(ამაღლების 12)"],["კობა კოჩალიძე","დეპო297(რუსთავი, მესხიშვილი)"],["დაიხურა","ოპტიკა 2(თბილისი, კავკასიის მედიცინის ცენტრი)"],["დაიხურა","წითელიA 96 ქ. თელავი, ალაზნის 6"],["შალვა გაგნიძე","წითელი A 97 გურჯაანი, წმინდა ნინოს 5"],["გიორგი აბრამიძე","დეპო298(გორი, ჭავჭავაძის 65)"],["გიორგი ლომიძე","დეპო301(გურამიშვილის ევექსი)"],["დაიხურა","ჯიპისი106(რუსთავი მოლი)"],["ალიკა ყალიჩავა","დეპო305(ჟვანიას მოედანი)"],["დაიხურა","წითელი A 98 მარნეული, ნარიმანოვის ქუჩა"],["გიორგი აბრამიძე","ჯიპისი625(გორი, სოფ. ტინისხიდი, სმარტი)"],["დაიხურა","დეპო306(ცოტნე დადიანის 135)"],["დაიხურა","კარტერსი 1(გალერეა თბილისი)"],["დაიხურა","წითელი A 93 თბილისი, გლდანის მე-7 მიკრო, 1ა კორპუსი"],["ალიკა ყალიჩავა","დეპო307(ბაქტერიოფაგი, ლევან გოთუას 3)"],["გიორგი ბოჭორიშვილი","დეპო308(ვაჟა-ფშაველას 79, მე-3 კვ. კორპუსი 15)"],["დაიხურა","წითელი A 99 მარნეული 26 მაისის ქუჩა"],["ვასო გოგალაძე","წითელი A 100 თბილისი, ქერჩის 6"],["დაიხურა","ჯიპისი626(გუდაური2)"],["ზაზა დემეტრაშვილი","დეპო 309 (თბილისი, სესილია თაყაიშვილის 22)"],["გიორგი ლომიძე","დეპო311 მცხეთა, სოფელი ნატახტარი"],["ვასო გოგალაძე","დეპო312(სოფელი კაბალი)"],["შალვა გაგნიძე","დეპო314(იმედის კლინიკა)"],["გიორგი ბოჭორიშვილი","ჯიპისი627(აგროჰაბი მაღლივი)"],["ალიკა ყალიჩავა","დეპო315(სულხან ცინცაძე, ევექსი)"],["გიორგი ლომიძე","დეპო316(ხუდადოვი)"],["კობა კოჩალიძე","წითელი A 101 სოფელი წალასყური"],["დაიხურა","წითელი A 102 თბილისი, საქართველოს ერთიანობისთვის მებრძოლთა ქ 16"],["ზაზა დემეტრაშვილი","წითელი A 103 ვარკეთილის მეურნეობა, რუსთაველის ქუჩა ნ18"],["დაიხურა","წითელი A 107 მცხეთა, სოფ. მუხრანი"],["ვასო გოგალაძე","ჯიპისი108(გლდანის სითი მოლი)"],["ალიკა ყალიჩავა","ჯიპისი109(მორკინალი)"],["დაიხურა","ჯიპისი110(გლდანი პლაზა)"],["გიორგი ბოჭორიშვილი","ჯიპისი628(ჯიქია)"],["დაიხურა","ჯიპისი630(ბარნოვი)"],["ალექსანდრე ტუხაშვილი","ჯიპისი631(ლუბლიანა)"],["დაიხურა","ჯიპისი632(ვაკის პარკი, მულტი)"],["გიორგი ბოჭორიშვილი","დეპო317(ყაზბეგის გამზ. 26)"],["კობა კოჩალიძე","დეპო318(წალკა)"],["გიორგი ტარყაშვილი","დეპო319(წმინდა ქეთევან წამებულის გამზ. 88)"],["ვასო გოგალაძე","დეპო320(მუხიანი)"],["დაიხურა","დეპო321(ყვარელი, იუსტიცია)"],["შალვა გაგნიძე","დეპო322(ავჭალა, ლიბანის ქუჩა)"],["ალიკა ყალიჩავა","დეპო323(ლისი, 112)"],["შალვა გაგნიძე","დეპო324(ვაშლიჯვარი)"],["შალვა გაგნიძე","დეპო325(ზაჰესი)"],["კობა კოჩალიძე","დეპო326(რუსთავი, კოსტავა)"],["დაიხურა","დეპო327(ბეთანია)"],["გიორგი აბრამიძე","დეპო329(რუისი)"],["დაიხურა","კარტერსი 3(სითი მოლი საბურთალო)"],["დაიხურა","კარტერსი 4(სითი მოლი გლდანი)"],["გიორგი ბოჭორიშვილი","ოპტიკა 5(სითი მოლი საბურთალო)"],["დაიხურა","ტრიუმფი 1(სითი მოლი საბურთალო)"],["შალვა გაგნიძე","TBS 6(თბილისი მოლი)"],["დაიხურა","TBS 7(აქსისი მოლი)"],["ვასო გოგალაძე","TBS 8(სითი მოლი გლდანი)"],["გუგა ბალანჩივაძე","ჯპს 634 ბაგები"],["გიორგი ლომიძე","დეპო 334 დადიანი"],["ალექსანდრე ტუხაშვილი","დეპო 335 წერეთელი"],["ზაზა დემეტრაშვილი","დეპო338(ვაზისუბანი, თეოფანე დავითაიას 28)"],["გიორგი აბრამიძე","დეპო339(ახალციხე, კოსტავას 3)"],["გუგა ბალანჩივაძე","დეპო340(რუსთაველი)"],["შალვა გაგნიძე","დეპო341(სატრანსპორტო კომპანია)"],["ზაზა დემეტრაშვილი","დეპო342(ჰუალინგ-პლაზა)"],["დაიხურა","დეპო343(ლუბლიანას 3)"],["დაიხურა","წითელი A 108 თბილისი, გლდანი, ილია ვეკუას ქ. N157"],["დაიხურა","ტრიუმფი 2(ჭავჭავაძის გამზ. 44)"],["გიორგი ბოჭორიშვილი","ჯიპისი111(ყაზბეგის 24ბ)"],["დაიხურა","ჯიპისი636(გლდანი, არქი)"],["ალექსანდრე ტუხაშვილი","ჯიპისი637(წერეთელი, გამოფენა)"],["კობა კოჩალიძე","ჯიპისი638(რუსთავი მოლი)"],["გიორგი ტარყაშვილი","ჯიპისი640(ქეთევან წამებული)"],["გუგა ბალანჩივაძე","TBS10(ჭავჭავაძე)"],["გიორგი აბრამიძე","დეპო345(გორი, ავტოსადგური)"],["დაიხურა","ჯორჯიტა (წერეთელი)"],["დაიხურა","ჯორჯიტა (ვაკე)"],["დაიხურა","ჯორჯიტა (ლისი)"],["დაიხურა","ჯორჯიტა (ჯიქია)"],["დაიხურა","ჯორჯიტა (მორკინალი)"],["დაიხურა","ჯორჯიტა (ცინცაძე)"],["დაიხურა","ოპტიკა 6(პუშკინი)"],["გუგა ბალანჩივაძე","დეპო348(ჟვანია, ვაკე)"],["დაიხურა","დეპო349(ბარნოვი)"],["დაიხურა","წითელი A 110 ქვემო ქართლი, გარდაბანი, მარტყოფი (სოფელი), ვაზიანი"],["დაიხურა","ჯიპისი641(შანხაი)"],["გუგა ბალანჩივაძე","ჯიპისი642(მრგვალი ბაღი)"],["გიორგი ტარყაშვილი","ჯიპისი643(აგროჰაბი სანაპირო)"],["გიორგი აბრამიძე","ჯიპისი645(გორი მოლი)"],["შალვა გაგნიძე","ჯიპისი646 თბილისი, მირიან მეფის #49"],["კობა კოჩალიძე","წითელი A 112 მარნეულის რაიონი, სოფ. დამია-გეურარხი"],["ზაზა დემეტრაშვილი","დეპო 350 (ივერთუბანი)თბილისი, ხეხილსანერგე მეურნეობა"],["გიორგი ტარყაშვილი","დეპო351(ორთაჭალა, ნადიკვარი)"],["ალიკა ყალიჩავა","დეპო354(მარშალ გელოვანი, M3)"],["შალვა გაგნიძე","დეპო355(დავით აღმაშენებლის ხეივანი, უნივერსამი)"],["გიორგი ბოჭორიშვილი","დეპო356(პოლიტკოვსკაია, ჩემი სახლი)"],["ზაზა დემეტრაშვილი","დეპო357(დიდი ლილო)"],["კობა კოჩალიძე","დეპო359(რუსთავი, შარტავა)"],["გიორგი ტარყაშვილი","დეპო360(სამგორი მოლი)"],["გიორგი ტარყაშვილი","დეპო361(კრწანისის 17)"],["ვასო გოგალაძე","დეპო362(ქერჩის 14)"],["დაიხურა","წითელი A 114 თბილისი, საბურთალო, ჟიული შარტავას ქ. #3"],["შალვა გაგნიძე","წითელი A 115 კახეთი, ლაგოდეხი, ვარდისუბანი (სოფელი)"],["გიორგი ბოჭორიშვილი","ჯიპისი647(ნუცუბიძის 125)"],["ალიკა ყალიჩავა","ჯიპისი651(აგროჰაბი, ო.ჭილაძის 9)"],["გიორგი ტარყაშვილი","ჯიპისი652(სამასი არაგველი)"],["ალიკა ყალიჩავა","ჯიპისი653(კანდელაკი)"],["ვასო გოგალაძე","ჯიპისი654(თელავი, ალაზნის 4)"],["კობა კოჩალიძე","წითელი A 117 მარნეული, ნარიმანოვის ქუჩა"],["გიორგი ლომიძე","დეპო363(წეროვანი)"],["ზაზა დემეტრაშვილი","დეპო364(აეროპორტის დასახლება)"],["კობა კოჩალიძე","დეპო365(საგარეჯო, აღმაშენებელი, მოედანი)"],["კობა კოჩალიძე","დეპო366(სოფელი სართიჭალა)"],["ვასო გოგალაძე","დეპო368(ყვარლის რაიონი, სოფელი ახალსოფელი)"],["გიორგი ტარყაშვილი","დეპო369(დირსი, ბერი გაბრიელ სალოსის გამზირი 127)"],["ალექსანდრე ტუხაშვილი","დეპო370(დიდუბეს ქვედა გამოსასვლელი)"],["დაიხურა","წითელი A 118 თბილისი, ვარკეთილი 3, 3ა მ/რ, რაფაელ დვალის ქ. #15"],["გიორგი ტარყაშვილი","დეპო373(ქინძმარაულის 10)"],["გიორგი ბოჭორიშვილი","დეპო374(შ. დათუაშვილის 7, ჯიბე)"],["გიორგი ბოჭორიშვილი","დეპო ოპტიკა 1(დელისი)"],["გიორგი ლომიძე","დეპო375(მუხრანი)"],["გიორგი ლომიძე","დეპო377(გადასასვლელი ხიდი)"],["შალვა გაგნიძე","დეპო378(ნესტან-დარეჯანის ქუჩა 36)"],["ვასო გოგალაძე","ჯიპისი657(აგროჰაბი, თ.ბოჭორიშვილის 21)"],["ზაზა დემეტრაშვილი","ჯიპისი655(სუხიშვილი)"],["გიორგი ლომიძე","წითელი A 119 მცხეთა-მთიანეთი, ყაზბეგი, სოფ. არშა"],["კობა კოჩალიძე","წითელი A 120 მარნეული, ალგეთი (სოფელი), 21-ე ქუჩის ჩიხი #1"],["დაიხურა","წითელი A 121 ბოლნისი, სოფ. ნახიდური"],["კობა კოჩალიძე","წითელი A 122 გარდაბნის რ-ნი, სოფელი მარტყოფი, ვაზიანის დასახლება"],["კობა კოჩალიძე","წითელი A 123 წალკა, კოსტავას 34"],["ზაზა დემეტრაშვილი","წითელი A 124 თბილისი, ვარკეთილი, IIIა მკრ, კ.336"],["გიორგი ბოჭორიშვილი","დეპო379(სოფელი ლისი)"],["გიორგი ლომიძე","ჯიპისი659(საგურამო)"],["გუგა ბალანჩივაძე","ლჯ127(თბილისი, მცხეთის ქუჩა)"],["ალექსანდრე ტუხაშვილი","ლჯ128(თბილისი, ავთო ვარაზის ქუჩა)"],["დაიხურა","ლჯ129(გლდანი, მასივი)"],["კობა კოჩალიძე","დეპო380(მარნეული, ბაზარი)"],["გიორგი აბრამიძე","დეპო381(ბორჯომი, რუსთაველი)"],["ვასო გოგალაძე","დეპო382(თელავი, თბილისის გზატკეცილი)"],["შალვა გაგნიძე","დეპო383(ნორიო)"],["ალიკა ყალიჩავა","დეპო384(გაზაფხულის ქუჩა)"],["გიორგი ტარყაშვილი","დეპო385(ბარათაშვილი)"],["ვასო გოგალაძე","დეპო388(გლდანი მოლი)"],["გიორგი აბრამიძე","ლჯ136(რუისი)"],["გუგა ბალანჩივაძე","ჯიპისი661(რუსთაველი, მ.კოსტავას 4)"],["გიორგი ტარყაშვილი","ჯიპისი662(ორბელიანი)"],["გიორგი ბოჭორიშვილი","ჯიპისი663(კავკასიის მედიცინის ცენტრი)"],["გიორგი ბოჭორიშვილი","ჯიპისი664(პოლიტკოვსკაიას 33 ბ)"],["გიორგი ბოჭორიშვილი","ჯიპისი667(ლისი, ლეო კვაჭაძის 19)"],["დაიხურა","ლჯ137(კოდა)"],["შალვა გაგნიძე","ლჯ138(სოფელი დიღომი)"],["კობა კოჩალიძე","ლჯ139(დმანისი)"],["გიორგი ლომიძე","ლჯ142 მცხეთის რაიონი, სოფელი მუხრანი"],["გიორგი აბრამიძე","ლჯ143 გორის მუნიცპალიტეტი, სოფელი მეჯვრისხევი, პირველი ქუჩის პირველი შესახვევი 7"],["შალვა გაგნიძე","ლჯ144(ბაკურციხე)"],["შალვა გაგნიძე","ლჯ145(ნუკრიანი)"],["ვასო გოგალაძე","დეპო389(თელავი მოლი)"],["გიორგი ბოჭორიშვილი","დეპო390(დელისი)"],["გიორგი აბრამიძე","დეპო391(ხაშური, გორმედი)"],["ზაზა დემეტრაშვილი","დეპო392(ვაზიანი)"],["გიორგი ბოჭორიშვილი","დეპო393(ფანასკერტელი)"],["ვასო გოგალაძე","დეპო394(თელავი, რეფერალური საავადმყოფო)"],["გიორგი აბრამიძე","დეპო397(გორი, გორმედი)"],["გიორგი აბრამიძე","დეპო399(გორი, სტალინის ქუჩა7)"],["გიორგი ლომიძე","ლჯ148(ანანური)"],["გიორგი ლომიძე","ლჯ149(არაგვისპირი)"],["გიორგი აბრამიძე","ლჯ150(ახალქალაქი)"],["შალვა გაგნიძე","ლჯ151(ლაგოდეხი სოფ.ვარდისუბანი)"],["კობა კოჩალიძე","ლჯ152(ბოლნისი)"],["","ლჯ156(ახაშენი)"],["კობა კოჩალიძე","ლჯ157(შულავერი)"],["გუგა ბალანჩივაძე","TBS11(გალერია)"],["გუგა ბალანჩივაძე","ჯიპისი669(შინდისი)"],["","ჯიპისი670(შროშის ქ.4)"],["ალიკა ყალიჩავა","დეპო402(პეკინი-ცინცაძე)"],["კობა კოჩალიძე","ლჯ158(კოდა)"],["კობა კოჩალიძე","ლჯ159(სოფელი სკრა)"]];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const low=s=>String(s).toLowerCase();
+let status='all';
+const items=DATA.map(([e,o])=>{
+  const m=o.match(/^(\D*?)\s*(\d+)\s*(.*)$/);
+  const brand=(m?m[1]:o).replace(/\s+/g,' ').trim()||'—';
+  let h=0;for(const ch of brand)h=(h*31+ch.charCodeAt(0))%360;
+  return{e,o,brand,n:m?String(+m[2]):'',nShow:m?m[2]:'#',color:`hsl(${h} 55% 48%)`,closed:low(e)==='დაიხურა',dial:(m&&(brand==='დეპო'||brand==='ჯიპისი')&&low(e)!=='დაიხურა')?(brand==='დეპო'?'4':'5')+m[2].padStart(3,'0'):'',el:low(e),ol:low(o)};
+});
+const emps=[...new Set(items.filter(i=>!i.closed&&i.e).map(i=>i.e))].sort((a,b)=>a.localeCompare(b,'ka'));
+$('emp').innerHTML+=emps.map(e=>`<option>${esc(e)}</option>`).join('');
+const nClosed=items.filter(i=>i.closed).length;
+$('sub').textContent=`სულ ${items.length} ობიექტი · მოქმედი ${items.length-nClosed} · დახურული ${nClosed}`;
+function hl(s,q){const i=low(s).indexOf(q);return(!q||i<0)?esc(s):esc(s.slice(0,i))+'<mark>'+esc(s.slice(i,i+q.length))+'</mark>'+esc(s.slice(i+q.length))}
+function search(){
+  const q=low($('q').value.trim()),emp=$('emp').value,res=$('res');
+  let list=items;
+  if(q){
+    if(/^\d+$/.test(q)){const qn=String(+q);let r=list.filter(i=>i.n===qn);list=r.length?r:list.filter(i=>i.ol.includes(q))}
+    else list=list.filter(i=>i.ol.includes(q)||i.el.includes(q));
+  }
+  if(status==='open')list=list.filter(i=>!i.closed);
+  if(status==='closed')list=list.filter(i=>i.closed);
+  if(emp)list=list.filter(i=>i.e===emp);
+  if(!q&&!emp&&status==='all'){$('count').textContent='';res.innerHTML='<div class="empty"><b>🔎</b>ჩაწერე ნომერი, სახელი ან მისამართი</div>';return}
+  if(!list.length){$('count').textContent='';res.innerHTML='<div class="empty"><b>😕</b>ვერაფერი მოიძებნა</div>';return}
+  $('count').textContent=`ნაპოვნია: ${list.length}`+(list.length>100?' (ნაჩვენებია პირველი 100)':'');
+  res.innerHTML=list.slice(0,100).map(i=>`<div class="card${i.closed?' closed':''}">
+   <div class="num" style="background:${i.color}">${esc(i.nShow)}<small>${esc(i.brand)}</small></div>
+   <div class="body"><div class="obj">${hl(i.o,q)}</div>
+   <div class="emp">${i.closed?'<span class="tag bad">დაიხურა</span>':hl(i.e||'—',q)}</div>
+   ${i.dial?`<a class="call" target="_top" rel="noopener" data-num="0322911900,${i.dial}" href="tel:0322911900,${i.dial}">📞 დარეკვა <small>${i.dial}</small></a>`:''}</div></div>`).join('');
+}
+$('res').addEventListener('click',e=>{
+  const a=e.target.closest('a.call');if(!a)return;
+  const n=a.dataset.num;
+  try{navigator.clipboard.writeText(n)}catch(_){}
+  const t=$('toast');t.textContent='იწყება დარეკვა: '+n+' (ნომერი დაკოპირდა)';t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),4000);
+});
+$('q').addEventListener('input',search);
+$('emp').addEventListener('change',search);
+$('seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;status=b.dataset.s;[...$('seg').children].forEach(x=>x.classList.toggle('on',x===b));search()});
+search();
+</script></body></html>
