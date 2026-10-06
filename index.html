@@ -36,7 +36,9 @@ select{font:inherit;font-size:.88rem;color:var(--text);background:var(--card);bo
 .tag.bad{background:var(--badbg);color:var(--bad)}
 .tag.ok{background:var(--okbg);color:var(--ok)}
 .card.closed{opacity:.8}
-.call{display:inline-flex;align-items:center;gap:8px;margin-top:10px;background:var(--ok);color:#fff;text-decoration:none;font-weight:600;font-size:.95rem;padding:9px 16px;border-radius:12px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.call.emp2{background:var(--accent)}
+.call{display:inline-flex;align-items:center;gap:8px;background:var(--ok);color:#fff;text-decoration:none;font-weight:600;font-size:.95rem;padding:9px 16px;border-radius:12px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:12px;font-size:.9rem;opacity:0;pointer-events:none;transition:.25s;max-width:90%;text-align:center}
 .toast.show{opacity:1}
 .call:active{transform:scale(.97)}
@@ -65,11 +67,13 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const low=s=>String(s).toLowerCase();
 let status='all';
+const PHONES={'გიორგი ლომიძე':'555558222','შალვა გაგნიძე':'551770200','ვასო გოგალაძე':'557949827','ვასილ გოგალაძე':'557949827','ალიკა ყალიჩავა':'551688899','გიორგი ტარყაშვილი':'577385250','გიორგი ბოჭორიშვილი':'591927831','გუგა ბალანჩივაძე':'577978792','ალექსანდრე ტუხაშვილი':'595391916','ზაზა დემეტრაშვილი':'591111887','გიორგი აბრამიძე':'577663060','კობა კოჩალიძე':'599546918'};
+const fmt=p=>p.replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3');
 const items=DATA.map(([e,o])=>{
   const m=o.match(/^(\D*?)\s*(\d+)\s*(.*)$/);
   const brand=(m?m[1]:o).replace(/\s+/g,' ').trim()||'—';
   let h=0;for(const ch of brand)h=(h*31+ch.charCodeAt(0))%360;
-  return{e,o,brand,n:m?String(+m[2]):'',nShow:m?m[2]:'#',color:`hsl(${h} 55% 48%)`,closed:low(e)==='დაიხურა',dial:(m&&(brand==='დეპო'||brand==='ჯიპისი')&&low(e)!=='დაიხურა')?(brand==='დეპო'?'4':'5')+m[2].padStart(3,'0'):'',el:low(e),ol:low(o)};
+  return{e,o,brand,n:m?String(+m[2]):'',nShow:m?m[2]:'#',color:`hsl(${h} 55% 48%)`,phone:PHONES[e]||'',closed:low(e)==='დაიხურა',dial:(m&&(brand==='დეპო'||brand==='ჯიპისი')&&low(e)!=='დაიხურა')?(brand==='დეპო'?'4':'5')+m[2].padStart(3,'0'):'',el:low(e),ol:low(o)};
 });
 const emps=[...new Set(items.filter(i=>!i.closed&&i.e).map(i=>i.e))].sort((a,b)=>a.localeCompare(b,'ka'));
 $('emp').innerHTML+=emps.map(e=>`<option>${esc(e)}</option>`).join('');
@@ -93,7 +97,7 @@ function search(){
    <div class="num" style="background:${i.color}">${esc(i.nShow)}<small>${esc(i.brand)}</small></div>
    <div class="body"><div class="obj">${hl(i.o,q)}</div>
    <div class="emp">${i.closed?'<span class="tag bad">დაიხურა</span>':hl(i.e||'—',q)}</div>
-   ${i.dial?`<a class="call" target="_top" rel="noopener" data-num="0322911900,${i.dial}" href="tel:0322911900,${i.dial}">📞 დარეკვა <small>${i.dial}</small></a>`:''}</div></div>`).join('');
+   ${(i.dial||i.phone)?`<div class="btns">${i.dial?`<a class="call" target="_top" rel="noopener" data-num="0322911900,${i.dial}" href="tel:0322911900,${i.dial}">📞 IT</a>`:''}${i.phone?`<a class="call emp2" target="_top" rel="noopener" data-num="${i.phone}" href="tel:+995${i.phone}">📞 ${esc(i.e)} <small>${fmt(i.phone)}</small></a>`:''}</div>`:''}</div></div>`).join('');
 }
 $('res').addEventListener('click',e=>{
   const a=e.target.closest('a.call');if(!a)return;
