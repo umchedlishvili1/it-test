@@ -97,14 +97,16 @@ function search(){
    <div class="num" style="background:${i.color}">${esc(i.nShow)}<small>${esc(i.brand)}</small></div>
    <div class="body"><div class="obj">${hl(i.o,q)}</div>
    <div class="emp">${i.closed?'<span class="tag bad">დაიხურა</span>':hl(i.e||'—',q)}</div>
-   ${(i.dial||i.phone)?`<div class="btns">${i.dial?`<a class="call" target="_top" rel="noopener" data-num="0322911900,${i.dial}" href="tel:0322911900,${i.dial}">📞 IT</a>`:''}${i.phone?`<a class="call emp2" target="_top" rel="noopener" data-num="${i.phone}" href="tel:+995${i.phone}">📞 ${esc(i.e)} <small>${fmt(i.phone)}</small></a>`:''}</div>`:''}</div></div>`).join('');
+   ${(i.dial||i.phone)?`<div class="btns">${i.dial?`<a class="call" data-num="0322911900,${i.dial}" href="tel:0322911900,${i.dial}">📞 დარეკვა ფილიალში <small>0322911900,${i.dial}</small></a>`:''}${i.phone?`<a class="call emp2" data-num="${i.phone}" href="tel:+995${i.phone}">📞 ${esc(i.e)} <small>${fmt(i.phone)}</small></a>`:''}</div>`:''}</div></div>`).join('');
 }
 $('res').addEventListener('click',e=>{
   const a=e.target.closest('a.call');if(!a)return;
-  const n=a.dataset.num;
+  const n=a.dataset.num,t=$('toast');
   try{navigator.clipboard.writeText(n)}catch(_){}
-  const t=$('toast');t.textContent='იწყება დარეკვა: '+n+' (ნომერი დაკოპირდა)';t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),4000);
+  let left=false;const mark=()=>{left=true};
+  window.addEventListener('blur',mark,{once:true});
+  document.addEventListener('visibilitychange',mark,{once:true});
+  setTimeout(()=>{if(!left){t.textContent='თუ დარეკვა არ დაიწყო, ნომერი დაკოპირებულია: '+n;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),6000)}},900);
 });
 $('q').addEventListener('input',search);
 $('emp').addEventListener('change',search);
